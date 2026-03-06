@@ -1,23 +1,36 @@
 "use client";
 
-import { Files, Search, GitBranch, Blocks, Settings, ChevronRight, Folder, FileText } from 'lucide-react';
+import { Files, Search as SearchIcon, GitBranch, Blocks, Settings } from 'lucide-react';
 import React from 'react';
 import { useTabContext } from '@/contexts/TabContext';
 import Explorer from './Explorer';
+import Search from './Search';
+import SourceControl from './SourceControl';
+import Extensions from './Extensions';
 
 const Sidebar = () => {
   const { activeTab, setActiveTab } = useTabContext();
 
   const topIcons = [
     { id: 'explorer', Icon: Files },
-    { id: 'search', Icon: Search },
+    { id: 'search', Icon: SearchIcon },
     { id: 'source-control', Icon: GitBranch },
     { id: 'extensions', Icon: Blocks },
   ];
 
+  const renderActiveTab = () => {
+    switch(activeTab) {
+      case 'explorer': return <Explorer />;
+      case 'search': return <Search />;
+      case 'source-control': return <SourceControl />;
+      case 'extensions': return <Extensions />;
+      default: return null;
+    }
+  }
+
   return (
-    <div className="flex h-full select-none font-sans pt-10 bg-[#1e1e1e]">
-      <div className="w-[48px] h-full bg-[#1e1e1e] flex flex-col items-center py-2 space-y-4 border-r border-[#2d2d2d] z-10">
+    <div className="flex h-full select-none font-sans pt-10 bg-tokyo-bg">
+      <div className="w-[48px] h-full bg-tokyo-panel flex flex-col items-center py-2 space-y-4 border-r border-tokyo-border z-10">
         {topIcons.map(({ id, Icon }) => {
           const isActive = activeTab === id;
           return (
@@ -25,11 +38,11 @@ const Sidebar = () => {
               key={id}
               onClick={() => setActiveTab(id)}
               className={`relative group cursor-pointer flex items-center justify-center w-full h-12 transition-colors ${
-                isActive ? 'text-white' : 'text-[#858585] hover:text-white'
+                isActive ? 'text-tokyo-fg' : 'text-tokyo-muted hover:text-tokyo-fg'
               }`}
             >
               {isActive && (
-                <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-blue-400"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-tokyo-blue"></div>
               )}
               <Icon className="w-6 h-6" strokeWidth={1.5} />
             </div>
@@ -41,17 +54,17 @@ const Sidebar = () => {
         <div 
           onClick={() => setActiveTab('settings')}
           className={`relative group cursor-pointer flex items-center justify-center w-full h-12 transition-colors ${
-            activeTab === 'settings' ? 'text-white' : 'text-[#858585] hover:text-white'
+            activeTab === 'settings' ? 'text-tokyo-fg' : 'text-tokyo-muted hover:text-tokyo-fg'
           }`}
         >
           {activeTab === 'settings' && (
-            <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-blue-400"></div>
+            <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-tokyo-blue"></div>
           )}
           <Settings className="w-6 h-6" strokeWidth={1.5} />
         </div>
       </div>
 
-      {activeTab === 'explorer' && <Explorer />}
+      {renderActiveTab()}
     </div>
   );
 };

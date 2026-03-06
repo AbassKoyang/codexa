@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #1a1b26; /* Tokyo Night default background */
+  --foreground: #c0caf5; /* Tokyo Night default text */
+  --tokyo-bg: #1a1b26;
+  --tokyo-panel: #24283b; /* Sidebar and activity bar */
+  --tokyo-blue: #7aa2f7; /* Accent active color */
+  --tokyo-border: #414868; /* Lines/borders */
+  --tokyo-fg: #c0caf5; /* Normal text */
+  --tokyo-muted: #a9b1d6; /* Muted text */
+  --tokyo-hover: #292e42; /* Hover background */
+  --tokyo-active: #2f354d; /* Active selection background */
 }
 
 @theme inline {
@@ -10,12 +18,21 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  --color-tokyo-bg: var(--tokyo-bg);
+  --color-tokyo-panel: var(--tokyo-panel);
+  --color-tokyo-blue: var(--tokyo-blue);
+  --color-tokyo-border: var(--tokyo-border);
+  --color-tokyo-fg: var(--tokyo-fg);
+  --color-tokyo-muted: var(--tokyo-muted);
+  --color-tokyo-hover: var(--tokyo-hover);
+  --color-tokyo-active: var(--tokyo-active);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1a1b26;
+    --foreground: #c0caf5;
   }
 }
 
