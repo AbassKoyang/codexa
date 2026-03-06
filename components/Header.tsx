@@ -3,9 +3,13 @@
 import React from 'react';
 import { Minus, Square, X, Hexagon, PanelLeft, PanelBottom, PanelRight } from 'lucide-react';
 import { useFileTree } from '@/contexts/FileTreeContext';
+import { VscLayoutPanel } from "react-icons/vsc";
+import { useLeftPanelContext } from '@/contexts/LayoutContext';
+
 
 const Header = () => {
   const { activeFile } = useFileTree();
+  const {isOpen, setIsOpen} = useLeftPanelContext()
   return (
     <div className="fixed top-0 left-0 flex items-center justify-between h-[35px] bg-tokyo-bg text-tokyo-fg text-[13px] select-none font-sans px-2 border-b border-tokyo-border w-full z-[1000]">
       <div className="flex items-center space-x-3">
@@ -26,9 +30,15 @@ const Header = () => {
       </div>
 
       <div className="flex items-center h-full gap-1.5">
-        <button className="flex items-center justify-center hover:bg-tokyo-hover transition-colors cursor-pointer p-1 rounded-md">
-          <PanelLeft className="size-5" strokeWidth={1.5} />
-        </button>
+        {isOpen ? (
+           <button onClick={() => setIsOpen(false)} className="flex items-center justify-center hover:bg-tokyo-hover transition-colors cursor-pointer p-1 rounded-md">
+            <VscLayoutPanel className="text-xl rotate-90" />
+          </button>
+        ) : (
+          <button  onClick={() => setIsOpen(true)} className="flex items-center justify-center hover:bg-tokyo-hover transition-colors cursor-pointer p-1 rounded-md">
+            <PanelLeft className="size-5" strokeWidth={1.5} />
+          </button>
+        )}
         <button className="flex items-center justify-center hover:bg-tokyo-hover transition-colors cursor-pointer p-1 rounded-md">
           <PanelBottom className="size-5" strokeWidth={1.5} />
         </button>

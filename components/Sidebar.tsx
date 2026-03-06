@@ -7,9 +7,11 @@ import Explorer from './Explorer';
 import Search from './Search';
 import SourceControl from './SourceControl';
 import Extensions from './Extensions';
+import { useLeftPanelContext } from '@/contexts/LayoutContext';
 
 const Sidebar = () => {
   const { activeTab, setActiveTab } = useTabContext();
+  
 
   const topIcons = [
     { id: 'explorer', Icon: Files },

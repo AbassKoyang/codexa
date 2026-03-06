@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { TabProvider } from "@/contexts/TabContext";
 import { FileTreeProvider } from "@/contexts/FileTreeContext";
+import { LeftPanelProvider } from "@/contexts/LayoutContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,15 +33,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col h-screen overflow-hidden bg-tokyo-bg text-tokyo-fg`}
       >
         <FileTreeProvider>
-          <TabProvider>
-            <Header />
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              <main className="flex-1 overflow-auto bg-tokyo-bg">
-                {children}
-              </main>
-            </div>
-          </TabProvider>
+          <LeftPanelProvider>
+            <TabProvider>
+              <Header />
+              <div className="flex flex-1 overflow-hidden">
+                <Sidebar />
+                <main className="flex-1 overflow-auto bg-tokyo-bg">
+                  {children}
+                </main>
+              </div>
+            </TabProvider>
+          </LeftPanelProvider>
         </FileTreeProvider>
       </body>
     </html>

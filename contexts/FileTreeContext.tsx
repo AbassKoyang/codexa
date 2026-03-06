@@ -28,6 +28,7 @@ interface FileTreeContextType {
   addNode: (node: FileNodeInput, parentId?: string) => void;
   deleteNode: (id: string) => void;
   renameNode: (id: string, newName: string) => void;
+  updateNodeContent: (id: string, content: string) => void;
 }
 
 const FileTreeContext = createContext<FileTreeContextType | undefined>(undefined);
@@ -55,10 +56,19 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
     return findNode(fileTree, activeFileId);
   }, [fileTree, activeFileId]);
 
+  const checkDuplicateName = (siblings: FileNode[], name: string, type: "file" | "folder") => {
+    return siblings.some(node => node.name === name && node.type === type);
+  };
+
   const addNode = (nodeData: FileNodeInput, parentId?: string) => {
     const newNode = { ...nodeData, id: generateId() } as FileNode;
 
     if (!parentId) {
+      if (checkDuplicateName(fileTree, newNode.name, newNode.type)) {
+        alert(`A ${newNode.type} named '${newNode.name}' already exists in this location.`);
+        return;
+      }
+
       setFileTree((prev) => {
         // Automatically sort folders first, then files
         const newTree = [...prev, newNode];
@@ -73,9 +83,16 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
     }
 
     setFileTree((prev) => {
+      let duplicateFound = false;
+
       const addRecursively = (nodes: FileNode[]): FileNode[] => {
         return nodes.map((node) => {
           if (node.id === parentId && node.type === "folder") {
+            if (checkDuplicateName(node.children, newNode.name, newNode.type)) {
+              duplicateFound = true;
+              return node; // Return unchanged if duplicate
+            }
+            
             const newChildren = [...node.children, newNode].sort((a, b) => {
               if (a.type === b.type) return a.name.localeCompare(b.name);
               return a.type === 'folder' ? -1 : 1;
@@ -89,10 +106,17 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
         });
       };
       
+      const newTree = addRecursively(prev);
+
+      if (duplicateFound) {
+        alert(`A ${newNode.type} named '${newNode.name}' already exists in this location.`);
+        return prev;
+      }
+
       // Optionally auto-select newly created files
       if (newNode.type === "file") setActiveFileId(newNode.id);
       
-      return addRecursively(prev);
+      return newTree;
     });
   };
 
@@ -118,7 +142,18 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
 
   const renameNode = (id: string, newName: string) => {
     setFileTree((prev) => {
+      let duplicateFound = false;
+
       const renameRecursively = (nodes: FileNode[]): FileNode[] => {
+        // First check if renaming would cause a collision in this array
+        const nodeToRename = nodes.find(n => n.id === id);
+        if (nodeToRename) {
+            if (checkDuplicateName(nodes, newName, nodeToRename.type)) {
+                duplicateFound = true;
+                return nodes;
+            }
+        }
+
         const updatedNodes = nodes.map((node) => {
           if (node.id === id) {
             return { ...node, name: newName };
@@ -129,13 +164,41 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
           return node;
         });
         
-        // Re-sort in case a name change affects ordering
-        return updatedNodes.sort((a, b) => {
-          if (a.type === b.type) return a.name.localeCompare(b.name);
-          return a.type === 'folder' ? -1 : 1;
+        // Only re-sort if we're in the array that had the change (or if child arrays changed, they sort themselves)
+        if (nodes.some(n => n.id === id)) {
+            return updatedNodes.sort((a, b) => {
+            if (a.type === b.type) return a.name.localeCompare(b.name);
+            return a.type === 'folder' ? -1 : 1;
+            });
+        }
+        return updatedNodes;
+      };
+      
+      const newTree = renameRecursively(prev);
+
+      if (duplicateFound) {
+          alert(`A file or folder named '${newName}' already exists in this location.`);
+          return prev;
+      }
+
+      return newTree;
+    });
+  };
+
+  const updateNodeContent = (id: string, content: string) => {
+    setFileTree((prev) => {
+      const updateRecursively = (nodes: FileNode[]): FileNode[] => {
+        return nodes.map((node) => {
+          if (node.id === id && node.type === "file") {
+            return { ...node, content };
+          }
+          if (node.type === "folder") {
+            return { ...node, children: updateRecursively(node.children) };
+          }
+          return node;
         });
       };
-      return renameRecursively(prev);
+      return updateRecursively(prev);
     });
   };
 
@@ -147,7 +210,8 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
       setActiveFileId, 
       addNode, 
       deleteNode, 
-      renameNode 
+      renameNode,
+      updateNodeContent
     }}>
       {children}
     </FileTreeContext.Provider>

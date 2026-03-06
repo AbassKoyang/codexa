@@ -5,7 +5,7 @@ import Editor from "@monaco-editor/react"
 import { useFileTree } from "@/contexts/FileTreeContext"
 
 export default function CodeEditor() {
-  const { activeFile } = useFileTree();
+  const { activeFile, updateNodeContent } = useFileTree();
   const [code, setCode] = useState("")
 
   // Update local code state when active file changes
@@ -15,7 +15,15 @@ export default function CodeEditor() {
     } else {
       setCode("");
     }
-  }, [activeFile]);
+  }, [activeFile?.id]); // Only reset local state when the actual active file ID changes
+
+  const handleEditorChange = (value: string | undefined) => {
+    const newContent = value || "";
+    setCode(newContent);
+    if (activeFile && activeFile.type === "file") {
+      updateNodeContent(activeFile.id, newContent);
+    }
+  };
 
   if (!activeFile || activeFile.type !== "file") {
     return (
@@ -33,7 +41,7 @@ export default function CodeEditor() {
         language="javascript"
         theme="vs-dark" 
         value={code}
-        onChange={(value) => setCode(value || "")}
+        onChange={handleEditorChange}
         options={{
           minimap: { enabled: false },
           fontSize: 14,

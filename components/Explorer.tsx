@@ -3,6 +3,7 @@
 import { ChevronRight, ChevronDown, FileText, Folder, FilePlus, FolderPlus, Edit2, Trash2, X } from 'lucide-react'
 import React, { useState, useEffect, useRef } from 'react'
 import { FileNode, useFileTree } from '@/contexts/FileTreeContext'
+import { useLeftPanelContext } from '@/contexts/LayoutContext';
 
 const FileTreeNode = ({ 
   node, 
@@ -33,7 +34,7 @@ const FileTreeNode = ({
 
   const handleCreateNew = (e: React.MouseEvent, type: 'file' | 'folder') => {
     e.stopPropagation();
-    setIsOpen(true); // Open folder if creating inside
+    setIsOpen(true);
     const name = type === 'file' ? prompt("Enter new file name:") : prompt("Enter new folder name:");
     if (name) {
       if (type === 'file') {
@@ -162,6 +163,8 @@ const FileTreeNode = ({
 const Explorer = () => {
   const { fileTree, addNode } = useFileTree();
   const [renamingId, setRenamingId] = useState<string | null>(null);
+  const {isOpen, setIsOpen} = useLeftPanelContext()
+
 
   const handleCreateFile = () => {
     const fileName = prompt("Enter file name:");
@@ -178,7 +181,7 @@ const Explorer = () => {
   };
 
   return (
-    <div className="w-[250px] h-full bg-tokyo-panel flex flex-col border-r border-tokyo-border text-tokyo-fg overflow-hidden select-none">
+    <div className={`${isOpen ? 'w-[250px]' : 'w-0'} h-full bg-tokyo-panel flex flex-col border-r border-tokyo-border text-tokyo-fg overflow-hidden select-none`}>
       <div className="flex flex-col h-full w-full">
         <div className="flex items-center justify-between px-4 h-[35px] text-[11px] font-semibold tracking-wide text-tokyo-fg uppercase shrink-0">
           <span>EXPLORER</span>
