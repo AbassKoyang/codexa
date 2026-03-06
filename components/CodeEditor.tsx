@@ -4,6 +4,31 @@ import { useState, useEffect } from "react"
 import Editor from "@monaco-editor/react"
 import { useFileTree } from "@/contexts/FileTreeContext"
 
+const getLanguageFromExtension = (fileName: string) => {
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  
+  switch (extension) {
+    case 'js':
+    case 'jsx':
+      return 'javascript';
+    case 'ts':
+    case 'tsx':
+      return 'typescript';
+    case 'html':
+      return 'html';
+    case 'css':
+      return 'css';
+    case 'json':
+      return 'json';
+    case 'md':
+      return 'markdown';
+    case 'py':
+      return 'python';
+    default:
+      return 'plaintext';
+  }
+};
+
 export default function CodeEditor() {
   const { activeFile, updateNodeContent } = useFileTree();
   const [code, setCode] = useState("")
@@ -38,7 +63,7 @@ export default function CodeEditor() {
     <div className="w-full h-full text-tokyo-fg bg-[#1e1e1e]">
       <Editor
         height="100%"
-        language="javascript"
+        language={getLanguageFromExtension(activeFile.name)}
         theme="vs-dark" 
         value={code}
         onChange={handleEditorChange}

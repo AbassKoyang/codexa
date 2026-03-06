@@ -3,9 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
+import RightPanel from "@/components/RightPanel";
 import { TabProvider } from "@/contexts/TabContext";
 import { FileTreeProvider } from "@/contexts/FileTreeContext";
-import { LeftPanelProvider } from "@/contexts/LayoutContext";
+import { LeftPanelProvider, RightPanelProvider, BottomPanelProvider } from "@/contexts/LayoutContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,15 +35,20 @@ export default function RootLayout({
       >
         <FileTreeProvider>
           <LeftPanelProvider>
-            <TabProvider>
-              <Header />
-              <div className="flex flex-1 overflow-hidden">
-                <Sidebar />
-                <main className="flex-1 overflow-auto bg-tokyo-bg">
-                  {children}
-                </main>
-              </div>
-            </TabProvider>
+            <RightPanelProvider>
+              <BottomPanelProvider>
+                <TabProvider>
+                  <Header />
+                  <div className="flex flex-1 overflow-hidden">
+                    <Sidebar />
+                    <main className="flex-1 overflow-auto bg-tokyo-bg">
+                      {children}
+                    </main>
+                    <RightPanel />
+                  </div>
+                </TabProvider>
+              </BottomPanelProvider>
+            </RightPanelProvider>
           </LeftPanelProvider>
         </FileTreeProvider>
       </body>

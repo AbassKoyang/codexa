@@ -4,6 +4,7 @@ import { ChevronRight, ChevronDown, FileText, Folder, FilePlus, FolderPlus, Edit
 import React, { useState, useEffect, useRef } from 'react'
 import { FileNode, useFileTree } from '@/contexts/FileTreeContext'
 import { useLeftPanelContext } from '@/contexts/LayoutContext';
+import { getIconForFile } from 'vscode-icons-js';
 
 const FileTreeNode = ({ 
   node, 
@@ -20,6 +21,8 @@ const FileTreeNode = ({
   const [renameValue, setRenameValue] = useState(node.name);
   const { addNode, deleteNode, renameNode, activeFileId, setActiveFileId } = useFileTree();
   const inputRef = useRef<HTMLInputElement>(null);
+  const icon = getIconForFile(node.name)
+
   
   const paddingLeft = `${(depth * 12) + 16}px`;
   const isRenaming = renamingId === node.id;
@@ -94,7 +97,11 @@ const FileTreeNode = ({
   const renderContent = () => (
     <div className="flex items-center min-w-0 pr-2 pb-[1px]">
       {node.type === "file" ? (
-        <FileText size={15} className={`mr-1.5 shrink-0 ${isActive ? 'text-tokyo-blue' : 'text-tokyo-fg/60'}`} />
+        // <FileText size={15} className={`mr-1.5 shrink-0 ${isActive ? 'text-tokyo-blue' : 'text-tokyo-fg/60'}`} />
+        <img
+        src={`https://raw.githubusercontent.com/vscode-icons/vscode-icons/master/icons/${icon}`}
+        width={16}
+      />
       ) : (
         <>
           <div className="mr-0.5 text-tokyo-fg/60 shrink-0">
@@ -181,7 +188,7 @@ const Explorer = () => {
   };
 
   return (
-    <div className={`${isOpen ? 'w-[250px]' : 'w-0'} h-full bg-tokyo-panel flex flex-col border-r border-tokyo-border text-tokyo-fg overflow-hidden select-none`}>
+    <div className={`${isOpen ? 'w-[250px]' : 'w-0'} h-full bg-tokyo-panel flex flex-col border-r border-tokyo-border text-tokyo-fg overflow-hidden select-none `}>
       <div className="flex flex-col h-full w-full">
         <div className="flex items-center justify-between px-4 h-[35px] text-[11px] font-semibold tracking-wide text-tokyo-fg uppercase shrink-0">
           <span>EXPLORER</span>
