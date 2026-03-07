@@ -19,7 +19,7 @@ const FileTreeNode = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [renameValue, setRenameValue] = useState(node.name);
-  const { addNode, deleteNode, renameNode, activeFileId, setActiveFileId } = useFileTree();
+  const { addNode, deleteNode, renameNode, activeFileId, setActiveFileId, openFiles, addFileToOpenFiles } = useFileTree();
   const inputRef = useRef<HTMLInputElement>(null);
   const icon = getIconForFile(node.name)
 
@@ -97,7 +97,6 @@ const FileTreeNode = ({
   const renderContent = () => (
     <div className="flex items-center min-w-0 pr-2 pb-[1px]">
       {node.type === "file" ? (
-        // <FileText size={15} className={`mr-1.5 shrink-0 ${isActive ? 'text-tokyo-blue' : 'text-tokyo-fg/60'}`} />
         <img
         src={`https://raw.githubusercontent.com/vscode-icons/vscode-icons/master/icons/${icon}`}
         width={16}
@@ -132,7 +131,7 @@ const FileTreeNode = ({
       <div 
         className={`flex items-center py-1 cursor-pointer group w-full ${isActive ? 'bg-[#37373d]/50 text-white' : 'hover:bg-white/5 text-tokyo-fg/80 hover:text-tokyo-fg'}`}
         style={{ paddingLeft }}
-        onClick={() => setActiveFileId(node.id)}
+        onClick={() => {setActiveFileId(node.id); addFileToOpenFiles(node.id)}}
       >
         <div className="flex items-center flex-1 min-w-0">
           {renderContent()}

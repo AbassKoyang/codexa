@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Editor from "@monaco-editor/react"
 import { useFileTree } from "@/contexts/FileTreeContext"
+import OpenFiles from "./OpenFiles";
 
 const getLanguageFromExtension = (fileName: string) => {
   const extension = fileName.split('.').pop()?.toLowerCase();
@@ -61,8 +62,9 @@ export default function CodeEditor() {
 
   return (
     <div className="w-full h-full text-tokyo-fg bg-[#1e1e1e]">
+        <OpenFiles />
       <Editor
-        height="100%"
+        height="95%"
         language={getLanguageFromExtension(activeFile.name)}
         theme="vs-dark" 
         value={code}

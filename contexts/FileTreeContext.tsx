@@ -24,6 +24,10 @@ interface FileTreeContextType {
   fileTree: FileNode[];
   activeFileId: string | null;
   activeFile: FileNode | null;
+  openFiles: FileNode[];
+  removeFileFromOpenFiles: (id: string) => void;
+  addFileToOpenFiles: (id: string) => void;
+  setOpenFiles: (files: FileNode[]) => void;
   setActiveFileId: (id: string | null) => void;
   addNode: (node: FileNodeInput, parentId?: string) => void;
   deleteNode: (id: string) => void;
@@ -38,6 +42,7 @@ const generateId = () => Math.random().toString(36).substring(2, 9);
 export function FileTreeProvider({ children }: { children: ReactNode }) {
   const [fileTree, setFileTree] = useState<FileNode[]>([]);
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
+  const [openFiles, setOpenFiles] = useState<FileNode[]>([]);
 
   const activeFile = useMemo(() => {
     if (!activeFileId) return null;
@@ -70,15 +75,17 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
       }
 
       setFileTree((prev) => {
-        // Automatically sort folders first, then files
         const newTree = [...prev, newNode];
         return newTree.sort((a, b) => {
           if (a.type === b.type) return a.name.localeCompare(b.name);
           return a.type === 'folder' ? -1 : 1;
         });
       });
-      // Optionally auto-select newly created files
-      if (newNode.type === "file") setActiveFileId(newNode.id);
+      if (newNode.type === "file") {
+        setOpenFiles((prev) => [...prev, newNode]);
+        console.log("Truuuu")
+        setActiveFileId(newNode.id);
+      };
       return;
     }
 
@@ -113,9 +120,10 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
         return prev;
       }
 
-      // Optionally auto-select newly created files
-      if (newNode.type === "file") setActiveFileId(newNode.id);
-      
+      if (newNode.type === "file") {
+        setActiveFileId(newNode.id);
+        setOpenFiles((prev) => [...prev.filter((node) => node.id !== newNode.id), newNode]);
+      }
       return newTree;
     });
   };
@@ -183,6 +191,7 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
 
       return newTree;
     });
+    setOpenFiles((prev) => [...prev.filter((node) => node.id !== id), {...fileTree.find((node) => node.id === id)!, name: newName}]);
   };
 
   const updateNodeContent = (id: string, content: string) => {
@@ -202,16 +211,31 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const removeFileFromOpenFiles = (id: string) => {
+    setOpenFiles((prev) => prev.filter((node) => node.id !== id));
+  };
+
+  const addFileToOpenFiles = (id: string) => {
+    if (openFiles.find((node) => node.id === id)) return;
+    const file = fileTree.find((node) => node.id === id);
+    if (!file) return;
+    setOpenFiles((prev) => [...prev, file]);
+  };
+
   return (
     <FileTreeContext.Provider value={{ 
       fileTree, 
       activeFileId, 
       activeFile, 
+      openFiles,
+      setOpenFiles,
       setActiveFileId, 
       addNode, 
       deleteNode, 
       renameNode,
-      updateNodeContent
+      updateNodeContent,
+      removeFileFromOpenFiles,
+      addFileToOpenFiles
     }}>
       {children}
     </FileTreeContext.Provider>

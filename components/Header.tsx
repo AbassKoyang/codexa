@@ -5,6 +5,7 @@ import { Minus, Square, X, Hexagon, PanelLeft, PanelBottom, PanelRight } from 'l
 import { useFileTree } from '@/contexts/FileTreeContext';
 import { VscLayoutPanel } from "react-icons/vsc";
 import { useLeftPanelContext, useRightPanelContext, useBottomPanelContext } from '@/contexts/LayoutContext';
+import OpenFiles from './OpenFiles';
 
 
 const Header = () => {
@@ -13,7 +14,8 @@ const Header = () => {
   const { isOpen: isRightOpen, setIsOpen: setIsRightOpen } = useRightPanelContext();
   const { isOpen: isBottomOpen, setIsOpen: setIsBottomOpen } = useBottomPanelContext();
   return (
-    <div className="fixed top-0 left-0 flex items-center justify-between h-[35px] bg-tokyo-bg text-tokyo-fg text-[13px] select-none font-sans px-2 border-b border-tokyo-border w-full z-[1000]">
+    <div className="fixed top-0 left-0 w-full">
+      <div className="flex items-center justify-between h-[35px] bg-tokyo-bg text-tokyo-fg text-[13px] select-none font-sans px-2 border-b border-tokyo-border w-full z-[1000]">
       <div className="flex items-center space-x-3">
           <h4 className='font-mono text-xl font-bold text-tokyo-blue'>CX</h4>
         <nav className="hidden md:flex items-center space-x-0.5">
@@ -62,6 +64,7 @@ const Header = () => {
           </button>
         )}
       </div>
+    </div>
     </div>
   );
 };
