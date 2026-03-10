@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
-import RightPanel from "@/components/RightPanel";
-import { TabProvider } from "@/contexts/TabContext";
-import { FileTreeProvider } from "@/contexts/FileTreeContext";
-import { LeftPanelProvider, RightPanelProvider, BottomPanelProvider } from "@/contexts/LayoutContext";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,24 +28,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col h-screen overflow-hidden bg-tokyo-bg text-tokyo-fg`}
       >
-        <FileTreeProvider>
-          <LeftPanelProvider>
-            <RightPanelProvider>
-              <BottomPanelProvider>
-                <TabProvider>
-                  <Header />
-                  <div className="flex flex-1 overflow-hidden">
-                    <Sidebar />
-                    <main className="flex-1 overflow-auto bg-tokyo-bg">
-                      {children}
-                    </main>
-                    <RightPanel />
-                  </div>
-                </TabProvider>
-              </BottomPanelProvider>
-            </RightPanelProvider>
-          </LeftPanelProvider>
-        </FileTreeProvider>
+        <main className="flex-1 overflow-auto bg-tokyo-bg">
+          {children}
+        </main>
       </body>
     </html>
   );
