@@ -61,10 +61,10 @@ export default function CodeEditor() {
   }
 
   return (
-    <div className="w-full h-full text-tokyo-fg bg-[#1e1e1e]">
+    <div className="w-full h-full text-tokyo-fg bg-tokyo-bg flex flex-col justify-end">
         <OpenFiles />
       <Editor
-        height="95%"
+        height="calc(100vh - 40px)"
         language={getLanguageFromExtension(activeFile.name)}
         theme="vs-dark" 
         value={code}

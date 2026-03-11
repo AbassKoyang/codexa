@@ -12,7 +12,7 @@ export const api = axios.create({
     "/api/auth/refresh/",
     "/api/auth/password-reset/",
     "/api/auth/password-reset/confirm/",
-    "/api/auth/me/",
+    // "/api/auth/me/",
   ];
         
   let isRefreshing = false;

@@ -5,7 +5,7 @@ import OpenFile from './OpenFile';
 const OpenFiles = () => {
   const { openFiles, activeFileId } = useFileTree();
   return (
-    <div className="w-full flex items-center bg-tokyo-panel mb-1">
+    <div className="w-full flex items-center bg-tokyo-panel">
       {openFiles.map((file) => <OpenFile key={file.id} file={file} activeFileId={activeFileId} />)}
     </div>
   )

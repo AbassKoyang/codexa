@@ -95,7 +95,7 @@ const FileTreeNode = ({
   );
 
   const renderContent = () => (
-    <div className="flex items-center min-w-0 pr-2 pb-[1px]">
+    <div className="flex items-center min-w-0 pr-2 pb-[1px] gap-1">
       {node.type === "file" ? (
         <img
         src={`https://raw.githubusercontent.com/vscode-icons/vscode-icons/master/icons/${icon}`}
@@ -129,7 +129,7 @@ const FileTreeNode = ({
   if (node.type === "file") {
     return (
       <div 
-        className={`flex items-center py-1 cursor-pointer group w-full ${isActive ? 'bg-[#37373d]/50 text-white' : 'hover:bg-white/5 text-tokyo-fg/80 hover:text-tokyo-fg'}`}
+        className={`flex items-center py-1 cursor-pointer group w-full ${isActive ? 'bg-tokyo-hover text-white' : 'hover:bg-tokyo-hover text-tokyo-fg/80 hover:text-tokyo-blue'}`}
         style={{ paddingLeft }}
         onClick={() => {setActiveFileId(node.id); addFileToOpenFiles(node.id)}}
       >

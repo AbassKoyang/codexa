@@ -31,7 +31,7 @@ const Sidebar = () => {
   }
 
   return (
-    <div className="flex h-full select-none font-sans pt-10 bg-tokyo-bg">
+    <div className="flex h-[calc(100vh-35px)] select-none font-sans bg-tokyo-bg self-end">
       <div className="w-[48px] h-full bg-tokyo-panel flex flex-col items-center py-2 space-y-4 border-r border-tokyo-border z-10">
         {topIcons.map(({ id, Icon }) => {
           const isActive = activeTab === id;

@@ -5,9 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 :root { /* Tokyo Night default background */ /* Tokyo Night default text */
-  --tokyo-bg: #1a1b26;
+  --tokyo-bg: #0f172a;
+  --tokyo-gray: #94A3B8;
   --tokyo-panel: #24283b; /* Sidebar and activity bar */
-  --tokyo-blue: #7aa2f7; /* Accent active color */
+  --tokyo-blue: #3C83F6; /* Accent active color */
   --tokyo-border: #414868; /* Lines/borders */
   --tokyo-fg: #c0caf5; /* Normal text */
   --tokyo-muted: #a9b1d6; /* Muted text */
@@ -22,6 +23,7 @@
   --font-mono: var(--font-geist-mono);
 
   --color-tokyo-bg: var(--tokyo-bg);
+  --color-tokyo-gray: var(--tokyo-gray);
   --color-tokyo-panel: var(--tokyo-panel);
   --color-tokyo-blue: var(--tokyo-blue);
   --color-tokyo-border: var(--tokyo-border);

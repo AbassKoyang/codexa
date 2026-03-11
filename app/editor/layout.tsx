@@ -4,6 +4,7 @@ import RightPanel from "@/components/RightPanel";
 import { TabProvider } from "@/contexts/TabContext";
 import { FileTreeProvider } from "@/contexts/FileTreeContext";
 import { LeftPanelProvider, RightPanelProvider, BottomPanelProvider } from "@/contexts/LayoutContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const layout = ({
   children,
@@ -11,6 +12,7 @@ const layout = ({
   children: React.ReactNode;
 }>) => {
   return (
+    <ProtectedRoute>
     <section className="flex flex-col h-screen overflow-hidden bg-tokyo-bg text-tokyo-fg">
         <FileTreeProvider>
           <LeftPanelProvider>
@@ -31,6 +33,8 @@ const layout = ({
           </LeftPanelProvider>
         </FileTreeProvider>
     </section>
+  </ProtectedRoute>
+
   )
 }
 

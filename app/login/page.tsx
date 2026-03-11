@@ -2,7 +2,7 @@
 import CodeEditor from "@/components/CodeEditor";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react"
-// import { toast } from "sonner"
+import { toast } from "sonner"
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import axios from "axios";
@@ -33,11 +33,11 @@ export default function LoginPage() {
 
       const res = await api.post(`/api/auth/google_login/`, formData, {withCredentials: true})
 
-      alert("Logged in with Google");
+      toast.success("Logged in with Google");
       window.location.replace("/");
     } catch (error) {
       console.error(error)
-      alert("Google authentication failed")
+      toast.error("Google authentication failed")
     }
   }
 
