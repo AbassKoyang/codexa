@@ -1,7 +1,8 @@
+'use client';
 import CodeEditor from "@/components/CodeEditor";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
+// import { toast } from "sonner"
 import { useRouter } from "next/navigation";
 import Script from "next/script";
 import axios from "axios";
@@ -32,11 +33,11 @@ export default function Home() {
 
       const res = await api.post(`/api/auth/google_login/`, formData, {withCredentials: true})
 
-      toast.success("Logged in with Google");
-      window.location.replace("/feed");
+      alert("Logged in with Google");
+      window.location.replace("/");
     } catch (error) {
       console.error(error)
-      toast.error("Google authentication failed")
+      alert("Google authentication failed")
     }
   }
 
@@ -54,7 +55,7 @@ export default function Home() {
       google.accounts.id.renderButton(googleButtonRef.current, {
         theme: "outline",
         size: "large",
-        text: "signup_with",
+        text: "signin_with",
         shape: "rectangular",
       });
     }
@@ -97,8 +98,8 @@ export default function Home() {
             <path d="M45 20L41.875 13.125L35 10L41.875 6.875L45 0L48.125 6.875L55 10L48.125 13.125L45 20ZM45 55L41.875 48.125L35 45L41.875 41.875L45 35L48.125 41.875L55 45L48.125 48.125L45 55ZM20 47.5L13.75 33.75L0 27.5L13.75 21.25L20 7.5L26.25 21.25L40 27.5L26.25 33.75L20 47.5ZM20 35.375L22.5 30L27.875 27.5L22.5 25L20 19.625L17.5 25L12.125 27.5L17.5 30L20 35.375Z" fill="#3C83F6" fill-opacity="0.4"/>
             </svg>
           </div>
-          <div className="w-[400px]">
-            <div ref={googleButtonRef}></div>
+          <div className="w-[400px] mt-3">
+            <div className="w-full" ref={googleButtonRef}></div>
           </div>
         </div>
       </div>
