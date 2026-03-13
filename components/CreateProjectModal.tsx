@@ -22,8 +22,10 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Plus, X, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useCreateProject } from '@/lib/mutations';
+import { LANGUAGE_CHOICES } from '@/lib/constants';
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -32,13 +34,38 @@ interface CreateProjectModalProps {
 
 const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => {
   const [projectName, setProjectName] = useState('');
-  const [framework, setFramework] = useState('');
+  const [language, setLanguage] = useState('javascript');
+  
+  const createProject = useCreateProject();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Creating project:', { name: projectName, framework });
-    // TODO: Implement backend integration
-    onOpenChange(false);
+    
+    if (!projectName.trim()) {
+      toast.error('Project name is required');
+      return;
+    }
+
+    createProject.mutate({
+      name: projectName,
+      language: language,
+      file_tree: {
+        root: {
+          type: "directory",
+          children: []
+        }
+      }
+    }, {
+      onSuccess: () => {
+        toast.success('Project created successfully!');
+        setProjectName('');
+        onOpenChange(false);
+      },
+      onError: (error: any) => {
+        console.error('Failed to create project:', error);
+        toast.error('Failed to create project. Please try again.');
+      }
+    });
   };
 
   return (
@@ -46,10 +73,6 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
       <DialogContent className="sm:max-w-[450px] bg-[#0f172a] border-[#1e293b] text-white p-6 rounded-none">
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
           <DialogTitle className="text-xl font-bold tracking-tight">Create New Project</DialogTitle>
-          {/* <DialogClose className="rounded-full p-1 opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground text-tokyo-muted">
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </DialogClose> */}
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -68,15 +91,20 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
 
             <Field>
               <FieldLabel className="text-sm font-semibold text-tokyo-fg mb-2">Framework / Language</FieldLabel>
-              <Select value={framework} onValueChange={setFramework} required>
+              <Select value={language} onValueChange={setLanguage} required>
                 <SelectTrigger className="bg-[#1e293b]/50 border-[#334155] focus:ring-0 focus:ring-offset-0 focus:border-tokyo-blue/50 text-white rounded-none h-11">
                   <SelectValue placeholder="Select a framework" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1e293b] border-[#334155] text-white rounded-none">
-                  <SelectItem className="rounded-none" value="nextjs">Next.js</SelectItem>
-                  <SelectItem className="rounded-none" value="react">React</SelectItem>
-                  <SelectItem className="rounded-none" value="python">Python</SelectItem>
-                  <SelectItem className="rounded-none" value="go">Go</SelectItem>
+                <SelectContent className="bg-[#1e293b] border-[#334155] text-white rounded-none max-h-[300px]">
+                  {LANGUAGE_CHOICES.map((choice) => (
+                    <SelectItem 
+                      key={choice.value} 
+                      value={choice.value}
+                      className="rounded-none focus:bg-tokyo-blue focus:text-white"
+                    >
+                      {choice.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </Field>
@@ -84,9 +112,14 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
 
           <Button 
             type="submit" 
+            disabled={createProject.isPending}
             className="w-full bg-tokyo-blue hover:bg-tokyo-blue/90 text-white font-bold h-11 rounded-none shadow-lg shadow-tokyo-blue/20 flex items-center justify-center gap-2 mt-4"
           >
-            <Plus size={18} />
+            {createProject.isPending ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Plus size={18} />
+            )}
             Create Project
           </Button>
 

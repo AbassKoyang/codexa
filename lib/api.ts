@@ -1,5 +1,5 @@
 import axios from "axios";
-import { User } from "./types";
+import { User, Project, PaginatedResponse } from "./types";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -83,3 +83,13 @@ export const fetchSessionUser = async () : Promise<User> => {
         throw error
     }
 }
+
+export const fetchProjects = async (page: number) : Promise<PaginatedResponse<Project>> => {
+  try {
+    const response =  await api.get(`/api/projects/?page=${page}`)
+    console.log(response.data)
+    return response.data as PaginatedResponse<Project>
+} catch (error) {
+    console.error("error fetching projects", error)
+    throw error
+}}

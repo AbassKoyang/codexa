@@ -1,29 +1,37 @@
 'use client';
 
 import React from 'react';
-import { Project } from '@/lib/types';
-import { FileText, MoreHorizontal, LayoutGrid, List } from 'lucide-react';
-
-const MOCK_ALL_PROJECTS: Project[] = [
-  {
-    id: '4',
-    name: 'documentation-site',
-    lastEdited: '3 days ago',
-    framework: 'MARKDOWN',
-    status: 'production',
-    branch: 'main branch'
-  },
-  {
-    id: '5',
-    name: 'rest-api-service',
-    lastEdited: '1 week ago',
-    framework: 'GO',
-    status: 'production',
-    branch: 'production'
-  }
-];
+import { FileText, MoreHorizontal, LayoutGrid, List, Loader2 } from 'lucide-react';
+import { useFetchProjects } from '@/lib/queries';
 
 const AllProjects = () => {
+  const { 
+    data, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage, 
+    isLoading, 
+    isError 
+  } = useFetchProjects();
+
+  const projects = data?.pages.flatMap(page => page.results) || [];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="w-8 h-8 text-tokyo-blue animate-spin" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-8 text-center text-red-400 bg-red-400/10 rounded-xl border border-red-400/20">
+        Failed to load projects.
+      </div>
+    );
+  }
+
   return (
     <section>
       <div className="flex items-center justify-between mb-6">
@@ -39,7 +47,7 @@ const AllProjects = () => {
       </div>
       
       <div className="space-y-3">
-        {MOCK_ALL_PROJECTS.map((project) => (
+        {projects.map((project) => (
           <div 
             key={project.id} 
             className="flex items-center gap-4 bg-[#1E293B] p-4 border border-[#414868]/30 hover:border-tokyo-blue/50 transition-all group cursor-pointer"
@@ -51,7 +59,7 @@ const AllProjects = () => {
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-white truncate group-hover:text-tokyo-blue transition-colors">{project.name}</h3>
               <p className="text-xs text-tokyo-muted mt-0.5">
-                Updated {project.lastEdited} • <span className="text-[#414868]">{project.branch}</span>
+                Updated {new Date(project.lastEdited).toLocaleDateString()} • <span className="text-[#414868]">{project.branch || 'main'}</span>
               </p>
             </div>
             
@@ -61,6 +69,31 @@ const AllProjects = () => {
           </div>
         ))}
       </div>
+
+      {hasNextPage && (
+        <div className="mt-8 flex justify-center">
+          <button 
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="px-6 py-2 bg-[#24283b] hover:bg-[#2d334a] text-white text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {isFetchingNextPage ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              'Load More'
+            )}
+          </button>
+        </div>
+      )}
+
+      {!isLoading && projects.length === 0 && (
+        <div className="py-20 text-center">
+          <p className="text-tokyo-muted italic">No projects found. Create your first one!</p>
+        </div>
+      )}
     </section>
   );
 };
