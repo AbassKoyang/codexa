@@ -8,15 +8,27 @@ import { useLeftPanelContext, useRightPanelContext, useBottomPanelContext } from
 import OpenFiles from './OpenFiles';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
-
+import { useSettings } from '@/contexts/SettingsContext';
+import { THEME_LIST } from '@/lib/themes';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const { activeFile, saveStatus } = useFileTree();
+  const { editorTheme, setEditorTheme } = useSettings();
   const {isOpen, setIsOpen} = useLeftPanelContext();
   const { isOpen: isRightOpen, setIsOpen: setIsRightOpen } = useRightPanelContext();
   const { isOpen: isBottomOpen, setIsOpen: setIsBottomOpen } = useBottomPanelContext();
-  const {user, loading} = useAuth()
-  console.log(user)
+  const {user} = useAuth()
+  
   return (
     <div className="fixed top-0 left-0 w-full">
       <div className="flex items-center justify-between h-[35px] bg-tokyo-bg text-tokyo-fg text-[13px] select-none font-sans px-2 border-b border-tokyo-border w-full z-[1000]">
@@ -79,13 +91,42 @@ const Header = () => {
         <div className="h-4 w-px bg-tokyo-border"></div>
         {user && (
           <div className="flex items-center gap-1">
-             <button className="flex items-center justify-center hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
+            <button className="flex items-center justify-center hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
               <Chromium className="size-5" strokeWidth={1.5} />
             </button>
-             <button className="flex items-center justify-center hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
-              <Settings  className="size-5" strokeWidth={1.5} />
-            </button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center justify-center hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
+                  <Settings className="size-5" strokeWidth={1.5} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-tokyo-bg border-tokyo-border text-tokyo-fg">
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="hover:bg-tokyo-hover focus:bg-tokyo-hover cursor-pointer data-[state=open]:bg-tokyo-hover text-sm">
+                    Theme
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="bg-tokyo-bg border-tokyo-border text-tokyo-fg max-h-[300px] overflow-y-auto w-48 scrollbar-hide">
+                    {Object.entries(THEME_LIST).map(([id, name]) => (
+                      <DropdownMenuItem 
+                        key={id} 
+                        onClick={() => setEditorTheme(id)}
+                        className={`hover:bg-tokyo-hover focus:bg-tokyo-hover cursor-pointer ${editorTheme === id ? 'text-tokyo-blue font-bold px-2' : ''}`}
+                      >
+                         {name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator className="bg-tokyo-border" />
+                <DropdownMenuItem className="hover:bg-tokyo-hover focus:bg-tokyo-hover cursor-pointer text-sm">
+                  Open User Settings
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <button className="flex items-center gap-[2px] hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
+
               <div className='size-[21px] rounded-full overflow-hidden cursor-pointer relative'>
                 <Image
                 className='object-cover'

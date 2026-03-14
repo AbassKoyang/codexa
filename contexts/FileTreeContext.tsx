@@ -48,22 +48,22 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
   const [openFiles, setOpenFiles] = useState<FileNode[]>([]);
   const [saveStatus, setSaveStatus] = useState<'saving' | 'saved' | 'error' | null>(null);
 
+  const findNode = (nodes: FileNode[], targetId: string): FileNode | null => {
+    for (const node of nodes) {
+      if (node.id === targetId) return node;
+      if (node.type === "folder") {
+        const found = findNode(node.children, targetId);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
   const activeFile = useMemo(() => {
     if (!activeFileId) return null;
-    
-    const findNode = (nodes: FileNode[], targetId: string): FileNode | null => {
-      for (const node of nodes) {
-        if (node.id === targetId) return node;
-        if (node.type === "folder") {
-          const found = findNode(node.children, targetId);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-    
     return findNode(fileTree, activeFileId);
   }, [fileTree, activeFileId]);
+
 
   const checkDuplicateName = (siblings: FileNode[], name: string, type: "file" | "folder") => {
     return siblings.some(node => node.name === name && node.type === type);
@@ -74,9 +74,9 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
 
     if (!parentId) {
       if (checkDuplicateName(fileTree, newNode.name, newNode.type)) {
-        alert(`A ${newNode.type} named '${newNode.name}' already exists in this location.`);
-        return undefined;
+        throw new Error(`A ${newNode.type} named '${newNode.name}' already exists in this location.`);
       }
+
 
       const newTree = [...fileTree, newNode].sort((a, b) => {
         if (a.type === b.type) return a.name.localeCompare(b.name);
@@ -116,9 +116,9 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
     const newTree = addRecursively(fileTree);
 
     if (duplicateFound) {
-      alert(`A ${newNode.type} named '${newNode.name}' already exists in this location.`);
-      return undefined;
+      throw new Error(`A ${newNode.type} named '${newNode.name}' already exists in this location.`);
     }
+
 
     setFileTree(newTree);
 
@@ -144,11 +144,15 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
     const newTree = deleteRecursively(fileTree);
     setFileTree(newTree);
     
-    if (activeFileId === id) {
+    setOpenFiles((prev) => prev.filter((file) => findNode(newTree, file.id) !== null));
+
+    if (activeFileId && findNode(newTree, activeFileId) === null) {
       setActiveFileId(null);
     }
+
     return newTree;
   };
+
 
   const renameNode = (id: string, newName: string): FileNode[] | undefined => {
     let duplicateFound = false;
@@ -184,9 +188,9 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
     const newTree = renameRecursively(fileTree);
 
     if (duplicateFound) {
-        alert(`A file or folder named '${newName}' already exists in this location.`);
-        return undefined;
+        throw new Error(`A file or folder named '${newName}' already exists in this location.`);
     }
+
 
     setFileTree(newTree);
     setOpenFiles((prev) => [...prev.filter((node) => node.id !== id), {...fileTree.find((node) => node.id === id)!, name: newName}]);
@@ -217,10 +221,11 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
 
   const addFileToOpenFiles = (id: string) => {
     if (openFiles.find((node) => node.id === id)) return;
-    const file = fileTree.find((node) => node.id === id);
+    const file = findNode(fileTree, id);
     if (!file) return;
     setOpenFiles((prev) => [...prev, file]);
   };
+
 
   return (
     <FileTreeContext.Provider value={{ 
