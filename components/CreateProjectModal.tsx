@@ -26,6 +26,7 @@ import { Plus, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCreateProject } from '@/lib/mutations';
 import { LANGUAGE_CHOICES } from '@/lib/constants';
+import { useRouter } from 'next/navigation';
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -35,6 +36,7 @@ interface CreateProjectModalProps {
 const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => {
   const [projectName, setProjectName] = useState('');
   const [language, setLanguage] = useState('javascript');
+  const router = useRouter();
   
   const createProject = useCreateProject();
 
@@ -51,15 +53,18 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
       language: language,
       file_tree: {
         root: {
-          type: "directory",
+          type: "folder",
           children: []
         }
       }
     }, {
-      onSuccess: () => {
+      onSuccess: (data: any) => {
         toast.success('Project created successfully!');
         setProjectName('');
         onOpenChange(false);
+        if(data && data.slug) {
+            router.push(`/editor?project=${data.slug}`)
+        }
       },
       onError: (error: any) => {
         console.error('Failed to create project:', error);

@@ -3,9 +3,11 @@
 import React from 'react';
 import { MoreHorizontal, Loader2 } from 'lucide-react';
 import { useFetchProjects } from '@/lib/queries';
+import { useRouter } from 'next/navigation';
 
 const RecentProjects = () => {
   const { data, isLoading, isError } = useFetchProjects();
+  const router = useRouter();
 
   const projects = data?.pages.flatMap(page => page.results).slice(0, 3) || [];
 
@@ -19,7 +21,7 @@ const RecentProjects = () => {
 
   if (isError) {
     return (
-      <div className="p-8 text-center text-red-400 bg-red-400/10 rounded-xl border border-red-400/20">
+      <div className="p-8 text-center text-red-400 bg-red-400/10 border border-red-400/20">
         Failed to load recent projects.
       </div>
     );
@@ -39,7 +41,8 @@ const RecentProjects = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((project) => (
           <div 
-            key={project.id} 
+            key={project.id}
+            onClick={() => router.push(`/editor?project=${project.slug}`)} 
             className="group bg-[#1E293B] border border-[#414868]/30 rounded-none overflow-hidden hover:border-tokyo-blue/50 transition-all duration-300 hover:shadow-2xl hover:shadow-tokyo-blue/5 cursor-pointer"
           >
             <div className="aspect-video relative overflow-hidden bg-[#24283b]">

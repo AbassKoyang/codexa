@@ -93,3 +93,23 @@ export const fetchProjects = async (page: number) : Promise<PaginatedResponse<Pr
     console.error("error fetching projects", error)
     throw error
 }}
+
+export const fetchProject = async (slug: string) : Promise<Project> => {
+    try {
+      const response = await api.get(`/api/projects/${slug}/`)
+      return response.data as Project
+  } catch (error) {
+      console.error("error fetching project", error)
+      throw error
+  }
+}
+
+export const updateProject = async (slug: string, data: Partial<Project>) : Promise<Project> => {
+    try {
+        const response = await api.patch(`/api/projects/${slug}/`, data);
+        return response.data as Project;
+    } catch (error) {
+        console.error("error updating project", error);
+        throw error;
+    }
+}

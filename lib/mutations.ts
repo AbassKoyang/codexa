@@ -61,3 +61,21 @@ export const useCreateProject = () => {
         }
     });
 };
+
+export const useUpdateProject = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ slug, data }: { slug: string, data: Partial<Project> }) => {
+            const response = await api.patch(`/api/projects/${slug}/`, data);
+            return response.data as Project;
+        },
+        onSuccess: (data) => {
+             // We won't optimistically update since we rely on local FileTreeContext state
+             // But we should invalidate the query so the tree remains fresh on reload
+             queryClient.invalidateQueries({ queryKey: ['project', data.slug] });
+             queryClient.invalidateQueries({ queryKey: ['projects'] });
+             queryClient.invalidateQueries({ queryKey: ['recent-projects'] });
+        }
+    });
+};

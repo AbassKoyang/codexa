@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Editor from "@monaco-editor/react"
 import { useFileTree } from "@/contexts/FileTreeContext"
 import OpenFiles from "./OpenFiles";
+import { useProjectSave } from '@/lib/useProjectSave';
 
 const getLanguageFromExtension = (fileName: string) => {
   const extension = fileName.split('.').pop()?.toLowerCase();
@@ -34,6 +35,8 @@ export default function CodeEditor() {
   const { activeFile, updateNodeContent } = useFileTree();
   const [code, setCode] = useState("")
 
+  const saveTree = useProjectSave();
+
   // Update local code state when active file changes
   useEffect(() => {
     if (activeFile && activeFile.type === "file") {
@@ -43,13 +46,16 @@ export default function CodeEditor() {
     }
   }, [activeFile?.id]); // Only reset local state when the actual active file ID changes
 
+
   const handleEditorChange = (value: string | undefined) => {
     const newContent = value || "";
     setCode(newContent);
     if (activeFile && activeFile.type === "file") {
-      updateNodeContent(activeFile.id, newContent);
+      const newTree = updateNodeContent(activeFile.id, newContent);
+      saveTree(newTree as any);
     }
   };
+
 
   if (!activeFile || activeFile.type !== "file") {
     return (

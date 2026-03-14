@@ -11,7 +11,7 @@ import Image from 'next/image';
 
 
 const Header = () => {
-  const { activeFile } = useFileTree();
+  const { activeFile, saveStatus } = useFileTree();
   const {isOpen, setIsOpen} = useLeftPanelContext();
   const { isOpen: isRightOpen, setIsOpen: setIsRightOpen } = useRightPanelContext();
   const { isOpen: isBottomOpen, setIsOpen: setIsBottomOpen } = useBottomPanelContext();
@@ -39,6 +39,9 @@ const Header = () => {
         <span className="truncate">
           {activeFile ? `${activeFile.name} - codexa - Visual Studio Code` : 'codexa - Visual Studio Code'}
         </span>
+        {saveStatus === 'saving' && <span className="ml-2 text-xs text-tokyo-muted bg-white/5 px-1.5 py-0.5 rounded-sm">Saving...</span>}
+        {saveStatus === 'saved' && <span className="ml-2 text-xs text-tokyo-blue bg-tokyo-blue/10 px-1.5 py-0.5 rounded-sm">Saved</span>}
+        {saveStatus === 'error' && <span className="ml-2 text-xs text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-sm">Failed to save</span>}
       </div>
 
       <div className="flex items-center gap-2">

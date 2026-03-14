@@ -1,10 +1,13 @@
 "use client";
 
-import { ChevronRight, ChevronDown, FileText, Folder, FilePlus, FolderPlus, Edit2, Trash2, X } from 'lucide-react'
+import { ChevronRight, ChevronDown, FileText, Folder, FilePlus, FolderPlus, Edit2, Trash2, X, Loader2 } from 'lucide-react'
 import React, { useState, useEffect, useRef } from 'react'
 import { FileNode, useFileTree } from '@/contexts/FileTreeContext'
 import { useLeftPanelContext } from '@/contexts/LayoutContext';
 import { getIconForFile } from 'vscode-icons-js';
+import { useSearchParams } from 'next/navigation';
+import { useFetchProject } from '@/lib/queries';
+import { useProjectSave } from '@/lib/useProjectSave';
 
 const FileTreeNode = ({ 
   node, 
@@ -22,6 +25,7 @@ const FileTreeNode = ({
   const { addNode, deleteNode, renameNode, activeFileId, setActiveFileId, openFiles, addFileToOpenFiles } = useFileTree();
   const inputRef = useRef<HTMLInputElement>(null);
   const icon = getIconForFile(node.name)
+  const saveTree = useProjectSave();
 
   
   const paddingLeft = `${(depth * 12) + 16}px`;
@@ -40,18 +44,21 @@ const FileTreeNode = ({
     setIsOpen(true);
     const name = type === 'file' ? prompt("Enter new file name:") : prompt("Enter new folder name:");
     if (name) {
+      let newTree;
       if (type === 'file') {
-        addNode({ type: "file", name, content: "" } as any, node.id);
+        newTree = addNode({ type: "file", name, content: "" } as any, node.id);
       } else {
-        addNode({ type: "folder", name, children: [] } as any, node.id);
+        newTree = addNode({ type: "folder", name, children: [] } as any, node.id);
       }
+      if (newTree) saveTree(newTree);
     }
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (confirm(`Are you sure you want to delete '${node.name}'?`)) {
-      deleteNode(node.id);
+      const newTree = deleteNode(node.id);
+      if (newTree) saveTree(newTree);
     }
   };
 
@@ -63,7 +70,8 @@ const FileTreeNode = ({
 
   const handleRenameSubmit = () => {
     if (renameValue.trim() && renameValue !== node.name) {
-      renameNode(node.id, renameValue.trim());
+      const newTree = renameNode(node.id, renameValue.trim());
+      if (newTree) saveTree(newTree);
     }
     setRenamingId(null);
   };
@@ -167,34 +175,77 @@ const FileTreeNode = ({
 }
 
 const Explorer = () => {
-  const { fileTree, addNode } = useFileTree();
+  const { fileTree, addNode, setFileTree, setActiveFileId, setOpenFiles } = useFileTree();
   const [renamingId, setRenamingId] = useState<string | null>(null);
-  const {isOpen, setIsOpen} = useLeftPanelContext()
+  const {isOpen, setIsOpen} = useLeftPanelContext();
+  const saveTree = useProjectSave();
 
+  const searchParams = useSearchParams();
+  const projectSlug = searchParams.get('project');
+  
+  const { data: project, isLoading, isError } = useFetchProject(projectSlug || undefined);
+
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    if (project && project.file_tree && project.file_tree.root) {
+      if (!isLoaded) {
+          // Clear open and active files on load
+          setOpenFiles([]);
+          setActiveFileId(null);
+          
+          const children = project.file_tree.root.children;
+          if (Array.isArray(children)) {
+            setFileTree(children);
+          } else {
+            setFileTree([]);
+          }
+          setIsLoaded(true);
+      }
+    } else if (project && !project.file_tree) {
+      if(!isLoaded) {
+          setFileTree([]);
+          setIsLoaded(true);
+      }
+    }
+  }, [project, setFileTree, setActiveFileId, setOpenFiles, isLoaded]);
 
   const handleCreateFile = () => {
     const fileName = prompt("Enter file name:");
     if (fileName) {
-      addNode({ type: "file", name: fileName, content: "" } as any);
+      const newTree = addNode({ type: "file", name: fileName, content: "" } as any);
+      if (newTree) saveTree(newTree);
     }
   };
 
   const handleCreateFolder = () => {
     const folderName = prompt("Enter folder name:");
     if (folderName) {
-      addNode({ type: "folder", name: folderName, children: [] } as any);
+      const newTree = addNode({ type: "folder", name: folderName, children: [] } as any);
+      if (newTree) saveTree(newTree);
     }
   };
+
+
 
   return (
     <div className={`${isOpen ? 'w-[250px]' : 'w-0'} h-full bg-tokyo-panel flex flex-col border-r border-tokyo-border text-tokyo-fg overflow-hidden select-none `}>
       <div className="flex flex-col h-full w-full">
         <div className="flex items-center justify-between px-4 h-[35px] text-[11px] font-semibold tracking-wide text-tokyo-fg uppercase shrink-0">
-          <span>EXPLORER</span>
+          <span>{project ? project.name.toUpperCase() : 'EXPLORER'}</span>
         </div>
         
         <div className="flex-1 overflow-y-auto py-2 overflow-x-hidden">
-          {fileTree.length === 0 ? (
+          {isLoading ? (
+             <div className="flex flex-col items-center justify-center h-full px-6 text-center text-tokyo-fg/60">
+                <Loader2 className="w-6 h-6 animate-spin text-tokyo-blue" />
+                <p className="text-xs mt-2">Loading workspace...</p>
+             </div>
+          ) : isError ? (
+            <div className="flex flex-col items-center justify-center h-full px-6 text-center text-red-400">
+               <p className="text-sm">Failed to load project.</p>
+            </div>
+          ) : fileTree.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full px-6 text-center text-tokyo-fg/60">
               <p className="text-sm mb-4">No files open</p>
               <button 
@@ -239,4 +290,4 @@ const Explorer = () => {
   )
 }
 
-export default Explorer
+export default Explorer

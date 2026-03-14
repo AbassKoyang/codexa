@@ -3,8 +3,10 @@
 import React from 'react';
 import { FileText, MoreHorizontal, LayoutGrid, List, Loader2 } from 'lucide-react';
 import { useFetchProjects } from '@/lib/queries';
+import { useRouter } from 'next/navigation';
 
 const AllProjects = () => {
+  const router = useRouter();
   const { 
     data, 
     fetchNextPage, 
@@ -26,7 +28,7 @@ const AllProjects = () => {
 
   if (isError) {
     return (
-      <div className="p-8 text-center text-red-400 bg-red-400/10 rounded-xl border border-red-400/20">
+      <div className="p-8 text-center text-red-400 bg-red-400/10 border border-red-400/20">
         Failed to load projects.
       </div>
     );
@@ -50,6 +52,7 @@ const AllProjects = () => {
         {projects.map((project) => (
           <div 
             key={project.id} 
+            onClick={() => router.push(`/editor?project=${project.slug}`)}
             className="flex items-center gap-4 bg-[#1E293B] p-4 border border-[#414868]/30 hover:border-tokyo-blue/50 transition-all group cursor-pointer"
           >
             <div className="w-10 h-10 rounded-xl bg-tokyo-blue/10 flex items-center justify-center text-tokyo-blue group-hover:bg-tokyo-blue group-hover:text-white transition-all">

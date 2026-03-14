@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
-import { fetchProjects, fetchSessionUser } from "./api"
+import { fetchProject, fetchProjects, fetchSessionUser } from "./api"
 import { Project, PaginatedResponse } from "./types"
 
 export const useFetchSessionUser = () => {
@@ -20,5 +20,13 @@ export const useFetchProjects = () => {
             const url = new URL(String(lastPage.next))
             return Number(url.searchParams.get('page'))
         }
+    })
+}
+
+export const useFetchProject = (slug?: string) => {
+    return useQuery({
+        queryFn: () => fetchProject(slug!),
+        queryKey: ['project', slug],
+        enabled: !!slug
     })
 }
