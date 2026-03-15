@@ -36,6 +36,8 @@ interface FileTreeContextType {
   deleteNode: (id: string) => FileNode[];
   renameNode: (id: string, newName: string) => FileNode[] | undefined;
   updateNodeContent: (id: string, content: string) => FileNode[];
+  searchTarget: { fileId: string; line: number } | null;
+  setSearchTarget: (target: { fileId: string; line: number } | null) => void;
 }
 
 const FileTreeContext = createContext<FileTreeContextType | undefined>(undefined);
@@ -47,6 +49,7 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const [openFiles, setOpenFiles] = useState<FileNode[]>([]);
   const [saveStatus, setSaveStatus] = useState<'saving' | 'saved' | 'error' | null>(null);
+  const [searchTarget, setSearchTarget] = useState<{ fileId: string; line: number } | null>(null);
 
   const findNode = (nodes: FileNode[], targetId: string): FileNode | null => {
     for (const node of nodes) {
@@ -243,7 +246,9 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
       renameNode,
       updateNodeContent,
       removeFileFromOpenFiles,
-      addFileToOpenFiles
+      addFileToOpenFiles,
+      searchTarget,
+      setSearchTarget
     }}>
       {children}
     </FileTreeContext.Provider>

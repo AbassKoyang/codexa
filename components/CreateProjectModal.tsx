@@ -22,11 +22,13 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Loader2 } from 'lucide-react';
+import { Plus, X, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCreateProject } from '@/lib/mutations';
 import { LANGUAGE_CHOICES } from '@/lib/constants';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { useFetchProjects } from '@/lib/queries';
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -37,8 +39,13 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
   const [projectName, setProjectName] = useState('');
   const [language, setLanguage] = useState('javascript');
   const router = useRouter();
+  const { user } = useAuth();
+  const { data: projectsData } = useFetchProjects();
   
   const createProject = useCreateProject();
+  
+  const totalProjects = projectsData?.pages[0]?.count || 0;
+  const isLimitReached = user?.plan === 'free' && totalProjects >= 3;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,52 +88,76 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <FieldGroup className="gap-6">
-            <Field>
-              <FieldLabel className="text-sm font-semibold text-tokyo-fg mb-2">Project Name</FieldLabel>
-              <Input
-                id="name"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                placeholder="e.g. My Awesome Startup"
-                className="bg-[#1e293b]/50 border-[#334155] focus:border-tokyo-blue/50 text-white placeholder:text-tokyo-muted rounded-none h-11"
-                required
-              />
-            </Field>
+          {isLimitReached ? (
+            <div className="bg-tokyo-blue/10 border border-tokyo-blue/20 p-6 text-center space-y-4">
+              <Sparkles className="mx-auto text-tokyo-blue size-12" />
+              <h3 className="font-bold text-lg">Project Limit Reached</h3>
+              <p className="text-sm text-tokyo-fg/70">
+                Free users are limited to 3 projects. Upgrade to Pro to create unlimited projects and unlock AI features!
+              </p>
+              <Button 
+                type="button"
+                onClick={() => {
+                  onOpenChange(false);
+                  // Trigger upgrade flow logic? Or just tell them to use the header button.
+                  // For now, let's keep it simple and just redirect or notify.
+                  toast.info("Click 'Upgrade to Pro' in the header to continue.");
+                }}
+                className="w-full bg-linear-to-r from-tokyo-blue to-purple-500 text-white font-bold h-11 rounded-none"
+              >
+                Upgrade Now
+              </Button>
+            </div>
+          ) : (
+            <>
+              <FieldGroup className="gap-6">
+                <Field>
+                  <FieldLabel className="text-sm font-semibold text-tokyo-fg mb-2">Project Name</FieldLabel>
+                  <Input
+                    id="name"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    placeholder="e.g. My Awesome Startup"
+                    className="bg-[#1e293b]/50 border-[#334155] focus:border-tokyo-blue/50 text-white placeholder:text-tokyo-muted rounded-none h-11"
+                    required
+                  />
+                </Field>
 
-            <Field>
-              <FieldLabel className="text-sm font-semibold text-tokyo-fg mb-2">Framework / Language</FieldLabel>
-              <Select value={language} onValueChange={setLanguage} required>
-                <SelectTrigger className="bg-[#1e293b]/50 border-[#334155] focus:ring-0 focus:ring-offset-0 focus:border-tokyo-blue/50 text-white rounded-none h-11">
-                  <SelectValue placeholder="Select a framework" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1e293b] border-[#334155] text-white rounded-none max-h-[300px]">
-                  {LANGUAGE_CHOICES.map((choice) => (
-                    <SelectItem 
-                      key={choice.value} 
-                      value={choice.value}
-                      className="rounded-none focus:bg-tokyo-blue focus:text-white"
-                    >
-                      {choice.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          </FieldGroup>
+                <Field>
+                  <FieldLabel className="text-sm font-semibold text-tokyo-fg mb-2">Framework / Language</FieldLabel>
+                  <Select value={language} onValueChange={setLanguage} required>
+                    <SelectTrigger className="bg-[#1e293b]/50 border-[#334155] focus:ring-0 focus:ring-offset-0 focus:border-tokyo-blue/50 text-white rounded-none h-11">
+                      <SelectValue placeholder="Select a framework" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1e293b] border-[#334155] text-white rounded-none max-h-[300px]">
+                      {LANGUAGE_CHOICES.map((choice) => (
+                        <SelectItem 
+                          key={choice.value} 
+                          value={choice.value}
+                          className="rounded-none focus:bg-tokyo-blue focus:text-white"
+                        >
+                          {choice.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </FieldGroup>
 
-          <Button 
-            type="submit" 
-            disabled={createProject.isPending}
-            className="w-full bg-tokyo-blue hover:bg-tokyo-blue/90 text-white font-bold h-11 rounded-none shadow-lg shadow-tokyo-blue/20 flex items-center justify-center gap-2 mt-4"
-          >
-            {createProject.isPending ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Plus size={18} />
-            )}
-            Create Project
-          </Button>
+              <Button 
+                type="submit" 
+                disabled={createProject.isPending}
+                className="w-full bg-tokyo-blue hover:bg-tokyo-blue/90 text-white font-bold h-11 rounded-none shadow-lg shadow-tokyo-blue/20 flex items-center justify-center gap-2 mt-4"
+              >
+                {createProject.isPending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Plus size={18} />
+                )}
+                Create Project
+              </Button>
+            </>
+          )}
 
           <p className="text-center text-[11px] text-tokyo-muted mt-4">
             By creating a project, you agree to our <a href="#" className="underline hover:text-white transition-colors">Terms of Service</a>.

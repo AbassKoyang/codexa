@@ -113,3 +113,13 @@ export const updateProject = async (slug: string, data: Partial<Project>) : Prom
         throw error;
     }
 }
+
+export const initializeSubscription = async (amount?: number) => {
+  try {
+    const response = await api.post("/api/subscriptions/initialize/", { amount });
+    return response.data;
+  } catch (error) {
+    console.error("Error initializing subscription", error);
+    throw error;
+  }
+};

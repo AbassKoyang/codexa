@@ -35,7 +35,7 @@ const getLanguageFromExtension = (fileName: string) => {
 }
 
 export default function CodeEditor() {
-  const { activeFile, updateNodeContent } = useFileTree()
+  const { activeFile, updateNodeContent, searchTarget, setSearchTarget } = useFileTree()
   const [code, setCode] = useState("")
   const [suggestion, setSuggestion] = useState("")
 
@@ -56,7 +56,15 @@ export default function CodeEditor() {
  function handleEditorDidMount(editor: any, monacoInstance: any) {
   editorRef.current = editor
 
-  editor.onDidChangeModelContent(() => {
+  editor.addCommand(
+  monaco?.KeyCode.Tab,
+  () => {
+    setSuggestion("")
+  },
+  "inlineSuggestionVisible"
+)
+
+  editor.onDidType((text: string) => {
     console.log("typing detected")
     const model = editor.getModel()
     const position = editor.getPosition()
@@ -92,9 +100,11 @@ ${context}
 Continuation:
 `
 
-    debouncedGenerateSuggestion({
-      prompt
-    })
+    if ([" ", ".", "(", "{", "\n"].includes(text)){
+      debouncedGenerateSuggestion({
+        prompt
+      })
+    }
   })
 }
 
@@ -240,6 +250,21 @@ Continuation:
       saveTree(newTree as any)
     }
   }
+
+  // -----------------------------
+  // Search navigation jump
+  // -----------------------------
+  useEffect(() => {
+    if (editorRef.current && searchTarget && activeFile?.id === searchTarget.fileId) {
+      const editor = editorRef.current;
+      editor.revealLineInCenter(searchTarget.line);
+      editor.setPosition({ lineNumber: searchTarget.line, column: 1 });
+      editor.focus();
+      
+      // Clear the target after jumping so it doesn't jump again on refocus
+      setSearchTarget(null);
+    }
+  }, [searchTarget, activeFile?.id, monaco]);
 
   // -----------------------------
   // Empty state

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 export const REGISTRATION_METHODS = ['email', 'google'] as const
+export const PLANS = ['free', 'paid'] as const
 
 export const userSchema = z.object({
   id: z.number(),
@@ -11,6 +12,9 @@ export const userSchema = z.object({
   registration_method: z.enum(REGISTRATION_METHODS).default('email'),
   profile_pic_url: z.union([z.string().url('Invalid URL'), z.literal('')]).optional().default(''),
   github: z.union([z.string().url('Invalid URL'), z.literal('')]).optional().default(''),
+  plan: z.enum(PLANS).default('free'),
+  paystack_customer_code: z.string().max(100).nullable().optional().default(null),
+  paystack_subscription_code: z.string().max(100).nullable().optional().default(null),
   is_staff: z.boolean().default(false),
   is_superuser: z.boolean().default(false),
   is_active: z.boolean().default(true),

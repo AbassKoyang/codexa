@@ -28,7 +28,9 @@ const HomeSidebar = () => {
         </div>
         <div>
           <h1 className="font-bold text-sm tracking-tight text-white">Codexa AI</h1>
-          <p className="text-[10px] text-tokyo-blue font-bold tracking-widest uppercase">Pro Plan</p>
+          <p className="text-[10px] text-tokyo-blue font-bold tracking-widest uppercase">
+            {user?.plan ? `${user.plan} Plan` : 'Loading...'}
+          </p>
         </div>
       </div>
 

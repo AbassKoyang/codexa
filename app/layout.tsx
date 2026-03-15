@@ -4,7 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import QueryProvider from "@/components/TanstackConfig";
 import { SettingsProvider } from "@/contexts/SettingsContext";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +40,7 @@ export default function RootLayout({
           </AuthProvider>
         </SettingsProvider>
       </QueryProvider>
-      <Toaster />
+      <SonnerToaster position="bottom-right" expand={true} richColors />
       </body>
     </html>
   );

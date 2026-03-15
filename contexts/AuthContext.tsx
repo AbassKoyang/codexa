@@ -1,5 +1,6 @@
 'use client'
 
+import { fetchSessionUser } from '@/lib/api'
 import { useFetchSessionUser } from '@/lib/queries'
 import { User } from '@/lib/types'
 import { createContext, useContext, useEffect, useState } from 'react'
@@ -7,17 +8,31 @@ import { createContext, useContext, useEffect, useState } from 'react'
 const AuthContext = createContext<{
   user: User | null
   loading: boolean,
-  setUser: (user: User | null) => void
+  setUser: (user: User | null) => void,
+  refreshUser: () => Promise<void>
 }>({
   user: null,
   loading: true,
-  setUser: () => {}
+  setUser: () => {},
+  refreshUser: async () => {}
 })
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const {data, isLoading, isError, error} = useFetchSessionUser()
+
+  const refreshUser = async () => {
+    setLoading(true)
+    try {
+      const updatedUser = await fetchSessionUser()
+      setUser(updatedUser)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -33,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [data])
 
   return (
-    <AuthContext.Provider value={{ user, loading, setUser }}>
+    <AuthContext.Provider value={{ user, loading, setUser, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )
