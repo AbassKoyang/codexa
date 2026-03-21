@@ -20,6 +20,8 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
+import { useFetchProject } from '@/lib/queries';
+import { useSearchParams } from 'next/navigation';
 
 const Header = () => {
   const { activeFile, saveStatus } = useFileTree();
@@ -28,6 +30,10 @@ const Header = () => {
   const { isOpen: isRightOpen, setIsOpen: setIsRightOpen } = useRightPanelContext();
   const { isOpen: isBottomOpen, setIsOpen: setIsBottomOpen } = useBottomPanelContext();
   const {user} = useAuth()
+  const searchParams = useSearchParams();
+  const projectSlug = searchParams.get('project');
+  
+  const { data: project, isLoading, isError } = useFetchProject(projectSlug || undefined);
   
   return (
     <div className="fixed top-0 left-0 w-full">
@@ -49,7 +55,7 @@ const Header = () => {
 
       <div className="flex items-center justify-center text-center max-w-[40%]">
         <span className="truncate">
-          {activeFile ? `${activeFile.name} - codexa - Visual Studio Code` : 'codexa - Visual Studio Code'}
+          {activeFile ? `${activeFile.name} - ${project?.name} - Codexa` : project?.name + ' - Codexa'}
         </span>
         {saveStatus === 'saving' && <span className="ml-2 text-xs text-tokyo-muted bg-white/5 px-1.5 py-0.5 rounded-sm">Saving...</span>}
         {saveStatus === 'saved' && <span className="ml-2 text-xs text-tokyo-blue bg-tokyo-blue/10 px-1.5 py-0.5 rounded-sm">Saved</span>}

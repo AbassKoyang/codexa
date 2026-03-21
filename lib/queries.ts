@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
-import { fetchProject, fetchProjects, fetchSessionUser } from "./api"
-import { Project, PaginatedResponse } from "./types"
+import { fetchHistory, fetchProject, fetchProjects, fetchSessionUser } from "./api"
+import { Project, PaginatedResponse, Message } from "./types"
 
 export const useFetchSessionUser = () => {
     return useQuery({
@@ -27,6 +27,14 @@ export const useFetchProject = (slug?: string) => {
     return useQuery({
         queryFn: () => fetchProject(slug!),
         queryKey: ['project', slug],
+        enabled: !!slug
+    })
+}
+
+export const useFetchHistory = (slug?: string) => {
+    return useQuery({
+        queryFn: () => fetchHistory(slug!),
+        queryKey: ['history', slug],
         enabled: !!slug
     })
 }

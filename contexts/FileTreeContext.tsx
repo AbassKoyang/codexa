@@ -8,6 +8,7 @@ export type FileNode =
       type: "file";
       name: string;
       content: string;
+      pendingContent?: string;
     }
   | {
       id: string;
@@ -36,6 +37,9 @@ interface FileTreeContextType {
   deleteNode: (id: string) => FileNode[];
   renameNode: (id: string, newName: string) => FileNode[] | undefined;
   updateNodeContent: (id: string, content: string) => FileNode[];
+  setPendingContent: (id: string, content: string) => FileNode[];
+  acceptChanges: (id: string) => FileNode[];
+  rejectChanges: (id: string) => FileNode[];
   searchTarget: { fileId: string; line: number } | null;
   setSearchTarget: (target: { fileId: string; line: number } | null) => void;
 }
@@ -217,6 +221,57 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
     return newTree;
   };
 
+  const setPendingContent = (id: string, content: string): FileNode[] => {
+    const updateRecursively = (nodes: FileNode[]): FileNode[] => {
+      return nodes.map((node) => {
+        if (node.id === id && node.type === "file") {
+          return { ...node, pendingContent: content };
+        }
+        if (node.type === "folder") {
+          return { ...node, children: updateRecursively(node.children) };
+        }
+        return node;
+      });
+    };
+    const newTree = updateRecursively(fileTree);
+    setFileTree(newTree);
+    return newTree;
+  };
+
+  const acceptChanges = (id: string): FileNode[] => {
+    const updateRecursively = (nodes: FileNode[]): FileNode[] => {
+      return nodes.map((node) => {
+        if (node.id === id && node.type === "file") {
+          return { ...node, content: node.pendingContent || node.content, pendingContent: undefined };
+        }
+        if (node.type === "folder") {
+          return { ...node, children: updateRecursively(node.children) };
+        }
+        return node;
+      });
+    };
+    const newTree = updateRecursively(fileTree);
+    setFileTree(newTree);
+    return newTree;
+  };
+
+  const rejectChanges = (id: string): FileNode[] => {
+    const updateRecursively = (nodes: FileNode[]): FileNode[] => {
+      return nodes.map((node) => {
+        if (node.id === id && node.type === "file") {
+          return { ...node, pendingContent: undefined };
+        }
+        if (node.type === "folder") {
+          return { ...node, children: updateRecursively(node.children) };
+        }
+        return node;
+      });
+    };
+    const newTree = updateRecursively(fileTree);
+    setFileTree(newTree);
+    return newTree;
+  };
+
 
   const removeFileFromOpenFiles = (id: string) => {
     setOpenFiles((prev) => prev.filter((node) => node.id !== id));
@@ -245,6 +300,9 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
       deleteNode, 
       renameNode,
       updateNodeContent,
+      setPendingContent,
+      acceptChanges,
+      rejectChanges,
       removeFileFromOpenFiles,
       addFileToOpenFiles,
       searchTarget,

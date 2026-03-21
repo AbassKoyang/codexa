@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useRightPanelContext } from '@/contexts/LayoutContext';
 import { 
   Bot, 
@@ -15,18 +15,13 @@ import {
   Clipboard,
   Check
 } from 'lucide-react';
-import { useFileTree } from '@/contexts/FileTreeContext';
-import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-type Message = {
-  id: string;
-  role: 'agent' | 'user';
-  content: string;
-  timestamp: string;
-};
+import { useSearchParams } from 'next/navigation';
+import { useFetchHistory } from '@/lib/queries';
+import { Message } from '@/lib/types';
+import { useFileTree } from '@/contexts/FileTreeContext';
 
 const CodeBlock = ({ children, className }: { children: any; className?: string }) => {
   const [isCopied, setIsCopied] = useState(false);
@@ -71,16 +66,48 @@ const CodeBlock = ({ children, className }: { children: any; className?: string 
   );
 };
 
+const formatMessageTime = (timestamp: string) => {
+  try {
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return timestamp;
+    
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    
+    if (isToday) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else {
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+  } catch (e) {
+    return timestamp;
+  }
+};
+
 const RightPanel = () => {
   const { isOpen } = useRightPanelContext();
-  const { fileTree } = useFileTree();
+  const { fileTree, openFiles, setPendingContent, setActiveFileId } = useFileTree();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [attachment, setAttachment] = useState<File | null>(null);
+  const [mode, setMode] = useState<'agent' | 'ask'>('agent');
   
+  const searchParams = useSearchParams();
+  const projectSlug = searchParams.get('project') || '';
+  const { data: historyData, isLoading: isHistoryLoading } = useFetchHistory(projectSlug);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (historyData) {
+      setMessages(historyData.results.map(msg => ({
+        ...msg,
+        id: msg.id.toString(),
+      } as Message)));
+    }
+  }, [historyData]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -93,11 +120,17 @@ const RightPanel = () => {
   const handleSend = async () => {
     if (!input.trim() || isStreaming) return;
 
+    // Map existing messages to Gemini format for context
+    const geminiHistory = messages.map(msg => ({
+      role: msg.role === 'agent' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    }));
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: input.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toISOString()
     };
     
     setMessages(prev => [...prev, userMessage]);
@@ -110,7 +143,7 @@ const RightPanel = () => {
       id: agentMessageId,
       role: 'agent',
       content: '',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toISOString()
     };
     setMessages(prev => [...prev, agentPlaceholder]);
 
@@ -118,6 +151,10 @@ const RightPanel = () => {
       const formData = new FormData();
       formData.append('prompt', currentInput);
       formData.append('file_tree', JSON.stringify(fileTree));
+      formData.append('project_slug', projectSlug);
+      formData.append('history', JSON.stringify(geminiHistory));
+      formData.append('mode', mode);
+      
       if (attachment) {
         formData.append('file', attachment);
       }
@@ -141,7 +178,45 @@ const RightPanel = () => {
       if (reader) {
         while (true) {
           const { value, done } = await reader.read();
-          if (done) break;
+          if (done) {
+            // After stream completes, if in Agent mode, look for file changes
+            if (mode === 'agent' && accumulatedContent) {
+              // Look for code blocks: ```[lang] [content] ```
+              const codeBlockRegex = /```(?:[a-zA-Z]*)\n?([\s\S]*?)```/g;
+              let match;
+              
+              while ((match = codeBlockRegex.exec(accumulatedContent)) !== null) {
+                const suggestedCode = match[1].trim();
+                
+                // Try to find which file this belongs to. 
+                // We'll look for a filename preceding the block.
+                const textBeforeMatch = accumulatedContent.substring(0, match.index);
+                const linesBefore = textBeforeMatch.trim().split('\n');
+                const lastLine = linesBefore[linesBefore.length - 1];
+                
+                // See if lastLine contains a filename from openFiles
+                const targetedFile = openFiles.find(file => 
+                  lastLine.toLowerCase().includes(file.name.toLowerCase()) ||
+                  textBeforeMatch.toLowerCase().includes(`applying to ${file.name.toLowerCase()}`) ||
+                  textBeforeMatch.toLowerCase().includes(`modifying ${file.name.toLowerCase()}`)
+                );
+
+                if (targetedFile) {
+                  setPendingContent(targetedFile.id, suggestedCode);
+                  setActiveFileId(targetedFile.id);
+                  toast.success(`AI suggested changes for ${targetedFile.name}`);
+                  break; // Only handle the first detected change for now
+                } else if (openFiles.length === 1) {
+                  // Fallback: if only one file is open, assume it's the target
+                  setPendingContent(openFiles[0].id, suggestedCode);
+                  setActiveFileId(openFiles[0].id);
+                  toast.success(`AI suggested changes for ${openFiles[0].name}`);
+                  break;
+                }
+              }
+            }
+            break;
+          }
           
           const chunkValue = decoder.decode(value);
           accumulatedContent += chunkValue;
@@ -196,7 +271,12 @@ const RightPanel = () => {
 
         {/* Chat History */}
         <div className="flex-1 overflow-y-auto p-4 space-y-8 scrollbar-hide">
-          {messages.length === 0 ? (
+          {isHistoryLoading ? (
+            <div className="h-full flex flex-col items-center justify-center space-y-4 opacity-50">
+               <Loader2 size={32} className="animate-spin text-tokyo-blue" />
+               <p className="text-xs font-medium uppercase tracking-widest text-tokyo-muted">Loading History...</p>
+            </div>
+          ) : messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center opacity-20 pointer-events-none px-8 text-center space-y-4">
                <Bot size={48} />
                <p className="text-sm font-medium">How can I help you build today?</p>
@@ -213,7 +293,7 @@ const RightPanel = () => {
                     {msg.role === 'agent' ? 'LUMINAL AI' : 'YOU'}
                   </span>
                 </div>
-                <span className="text-[10px] text-tokyo-muted">{msg.timestamp}</span>
+                <span className="text-[10px] text-tokyo-muted">{formatMessageTime(msg.timestamp)}</span>
               </div>
 
               {/* Message Content */}
@@ -311,6 +391,22 @@ const RightPanel = () => {
             />
             
             <div className="absolute bottom-2 left-2 flex items-center gap-3 text-tokyo-muted">
+              <div className="flex bg-[#1a1b26] border border-tokyo-border p-0.5 rounded-lg mr-1">
+                <button 
+                  onClick={() => setMode('agent')}
+                  className={`px-2 py-1 text-[9px] font-bold rounded-md transition-all flex items-center gap-1 ${mode === 'agent' ? 'bg-tokyo-blue text-white shadow-lg' : 'text-tokyo-muted hover:text-white'}`}
+                >
+                  <Zap size={10} fill={mode === 'agent' ? 'currentColor' : 'none'} />
+                  AGENT
+                </button>
+                <button 
+                  onClick={() => setMode('ask')}
+                  className={`px-2 py-1 text-[9px] font-bold rounded-md transition-all flex items-center gap-1 ${mode === 'ask' ? 'bg-tokyo-blue text-white shadow-lg' : 'text-tokyo-muted hover:text-white'}`}
+                >
+                  <Send size={10} />
+                  ASK
+                </button>
+              </div>
               <button 
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isStreaming}

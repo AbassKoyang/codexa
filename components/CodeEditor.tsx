@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import Editor, { useMonaco } from "@monaco-editor/react"
+import Editor, { DiffEditor, useMonaco } from "@monaco-editor/react"
+import { Check, X, Sparkles } from "lucide-react"
 import { useFileTree } from "@/contexts/FileTreeContext"
 import OpenFiles from "./OpenFiles"
 import { useProjectSave } from "@/lib/useProjectSave"
@@ -35,7 +36,7 @@ const getLanguageFromExtension = (fileName: string) => {
 }
 
 export default function CodeEditor() {
-  const { activeFile, updateNodeContent, searchTarget, setSearchTarget } = useFileTree()
+  const { activeFile, updateNodeContent, acceptChanges, rejectChanges, searchTarget, setSearchTarget } = useFileTree()
   const [code, setCode] = useState("")
   const [suggestion, setSuggestion] = useState("")
 
@@ -238,7 +239,7 @@ Continuation:
     } else {
       setCode("")
     }
-  }, [activeFile?.id])
+  }, [activeFile?.id, activeFile?.type === "file" ? activeFile?.content : null])
 
   const handleEditorChange = (value: string | undefined) => {
     const newContent = value || ""
@@ -250,6 +251,19 @@ Continuation:
       saveTree(newTree as any)
     }
   }
+
+  const handleAcceptChanges = () => {
+    if (activeFile) {
+        const newTree = acceptChanges(activeFile.id);
+        saveTree(newTree as any);
+    }
+  };
+
+  const handleRejectChanges = () => {
+    if (activeFile) {
+        rejectChanges(activeFile.id);
+    }
+  };
 
   // -----------------------------
   // Search navigation jump
@@ -287,8 +301,56 @@ Continuation:
   }
 
   // -----------------------------
-  // Editor
+  // Editor / Diff View
   // -----------------------------
+  if (activeFile.pendingContent) {
+    return (
+      <div className="w-full h-full text-tokyo-fg bg-tokyo-bg flex flex-col overflow-hidden">
+        <OpenFiles />
+
+        {/* AI Suggestion Header */}
+        <div className="flex items-center justify-between px-6 py-2 bg-tokyo-blue/5 border-b border-tokyo-border animate-in fade-in slide-in-from-top-2 duration-300 shrink-0">
+          
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleRejectChanges}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-[11px] font-bold text-tokyo-muted hover:text-white hover:bg-red-500/20 hover:border-red-500/50 border border-transparent transition-all"
+            >
+              <X size={14} />
+              REJECT
+            </button>
+            <button 
+              onClick={handleAcceptChanges}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-md text-[11px] font-bold bg-tokyo-blue text-white hover:bg-tokyo-blue/80 shadow-lg shadow-tokyo-blue/20 transition-all"
+            >
+              <Check size={14} />
+              ACCEPT
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <DiffEditor
+            height="100%"
+            language={getLanguageFromExtension(activeFile.name)}
+            theme={editorTheme}
+            original={activeFile.content}
+            modified={activeFile.pendingContent}
+            options={{
+              minimap: { enabled: false },
+              fontSize: 14,
+              fontFamily: "'Geist Mono', monospace",
+              wordWrap: "on",
+              readOnly: true,
+              scrollBeyondLastLine: false,
+              renderSideBySide: true,
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-full text-tokyo-fg bg-tokyo-bg flex flex-col">
       <OpenFiles />

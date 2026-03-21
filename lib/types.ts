@@ -24,3 +24,17 @@ export interface Project {
   thumbnail?: string;
   file_tree?: any;
 }
+
+export interface Message {
+  id: string | number;
+  role: 'agent' | 'user';
+  content: string;
+  timestamp: string;
+}
+
+export interface Results<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}

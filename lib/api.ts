@@ -1,5 +1,5 @@
 import axios from "axios";
-import { User, Project, PaginatedResponse } from "./types";
+import { User, Project, PaginatedResponse, Message, Results } from "./types";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -123,3 +123,13 @@ export const initializeSubscription = async (amount?: number) => {
     throw error;
   }
 };
+
+export const fetchHistory = async (slug: string) : Promise<Results<Message>> => {
+    try {
+        const response = await api.get(`/api/ai/history/${slug}/`);
+        return response.data;
+    } catch (error) {
+        console.error("error fetching history", error);
+        throw error;
+    }
+}
