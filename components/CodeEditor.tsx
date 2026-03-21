@@ -128,7 +128,7 @@ Continuation:
   // -----------------------------
   const generateSuggestion = async (data: any) => {
     try {
-      const response = await api.post("/api/ai/", data)
+      const response = await api.post("/api/ai/autocomplete/", data)
 
       const aiCode = cleanAIResponse(response.data.response) || cleanAIResponse(response.data)
 
