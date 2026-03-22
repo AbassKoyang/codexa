@@ -124,7 +124,7 @@ export const initializeSubscription = async (amount?: number) => {
   }
 };
 
-export const fetchHistory = async (slug: string) : Promise<Results<Message>> => {
+export const fetchHistory = async (slug: string) : Promise<Message[]> => {
     try {
         const response = await api.get(`/api/ai/history/${slug}/`);
         return response.data;

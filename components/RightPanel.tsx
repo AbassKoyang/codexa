@@ -37,7 +37,7 @@ const CodeBlock = ({ children, className }: { children: any; className?: string 
   };
 
   return (
-    <div className="my-4 rounded-lg overflow-hidden border border-tokyo-border bg-[#10141f] group/code">
+    <div className="my-4 overflow-hidden border border-tokyo-border bg-[#10141f] group/code">
       <div className="bg-[#1a1b26] px-3 py-1.5 border-b border-tokyo-border flex justify-between items-center">
         <span className="text-[10px] font-bold text-tokyo-muted uppercase tracking-widest">{language || 'code'}</span>
         <button 
@@ -84,6 +84,25 @@ const formatMessageTime = (timestamp: string) => {
   }
 };
 
+const getAgentDisplayContent = (content: string) => {
+  if (!content.trim().startsWith('{')) return content;
+  
+  try {
+    const parsed = JSON.parse(content);
+    if (parsed.response) return parsed.response;
+  } catch (e) {
+    // Regex for partial JSON streaming - find 'response' attribute
+    const responseMatch = content.match(/"response":\s*"([\s\S]*?)(?:"[,\}]|$)/);
+    if (responseMatch) {
+      return responseMatch[1]
+        .replace(/\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .replace(/\\t/g, '\t');
+    }
+  }
+  return '';
+};
+
 const RightPanel = () => {
   const { isOpen } = useRightPanelContext();
   const { fileTree, openFiles, setPendingContent, setActiveFileId } = useFileTree();
@@ -102,7 +121,8 @@ const RightPanel = () => {
 
   useEffect(() => {
     if (historyData) {
-      setMessages(historyData.results.map(msg => ({
+      console.log(historyData)
+      setMessages(historyData.map(msg => ({
         ...msg,
         id: msg.id.toString(),
       } as Message)));
@@ -179,40 +199,27 @@ const RightPanel = () => {
         while (true) {
           const { value, done } = await reader.read();
           if (done) {
-            // After stream completes, if in Agent mode, look for file changes
-            if (mode === 'agent' && accumulatedContent) {
-              // Look for code blocks: ```[lang] [content] ```
-              const codeBlockRegex = /```(?:[a-zA-Z]*)\n?([\s\S]*?)```/g;
-              let match;
-              
-              while ((match = codeBlockRegex.exec(accumulatedContent)) !== null) {
-                const suggestedCode = match[1].trim();
+            if (mode === 'agent' && accumulatedContent.trim().startsWith('{')) {
+              try {
+                const parsed = JSON.parse(accumulatedContent);
+                const { file_tree, modified_files, response } = parsed;
                 
-                // Try to find which file this belongs to. 
-                // We'll look for a filename preceding the block.
-                const textBeforeMatch = accumulatedContent.substring(0, match.index);
-                const linesBefore = textBeforeMatch.trim().split('\n');
-                const lastLine = linesBefore[linesBefore.length - 1];
-                
-                // See if lastLine contains a filename from openFiles
-                const targetedFile = openFiles.find(file => 
-                  lastLine.toLowerCase().includes(file.name.toLowerCase()) ||
-                  textBeforeMatch.toLowerCase().includes(`applying to ${file.name.toLowerCase()}`) ||
-                  textBeforeMatch.toLowerCase().includes(`modifying ${file.name.toLowerCase()}`)
-                );
-
-                if (targetedFile) {
-                  setPendingContent(targetedFile.id, suggestedCode);
-                  setActiveFileId(targetedFile.id);
-                  toast.success(`AI suggested changes for ${targetedFile.name}`);
-                  break; // Only handle the first detected change for now
-                } else if (openFiles.length === 1) {
-                  // Fallback: if only one file is open, assume it's the target
-                  setPendingContent(openFiles[0].id, suggestedCode);
-                  setActiveFileId(openFiles[0].id);
-                  toast.success(`AI suggested changes for ${openFiles[0].name}`);
-                  break;
+                if (file_tree && modified_files) {
+                  // Apply pending content only for modified files
+                  file_tree.forEach((node: any) => {
+                    if (node.type === 'file' && modified_files.includes(node.name)) {
+                      setPendingContent(node.id, node.content);
+                      
+                      // Also set active file if it's one of the modified ones
+                      if (openFiles.some(f => f.id === node.id)) {
+                        setActiveFileId(node.id);
+                      }
+                    }
+                  });
+                  toast.success(`Agent suggested changes for: ${modified_files.join(', ')}`);
                 }
+              } catch (e) {
+                console.error("Failed to parse agent JSON:", e);
               }
             }
             break;
@@ -286,11 +293,16 @@ const RightPanel = () => {
               {/* Message Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`size-6 rounded flex items-center justify-center ${msg.role === 'agent' ? 'bg-tokyo-blue/20 text-tokyo-blue' : 'bg-tokyo-purple/20 text-tokyo-purple'}`}>
-                    {msg.role === 'agent' ? <Zap size={14} fill="currentColor" /> : <User size={14} />}
+                  <div className={`size-6 flex items-center justify-center ${msg.role === 'agent' ? 'bg-tokyo-blue/20 text-tokyo-blue' : 'bg-tokyo-purple/20 text-tokyo-purple'}`}>
+                    {msg.role === 'agent' ? 
+                    <div className="flex items-center justify-center p-0.5 border border-tokyo-blue border-dashed relative">
+                      <svg className='size-3.5' width="30" height="24" viewBox="0 0 30 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 24C2.175 24 1.46875 23.7062 0.88125 23.1187C0.29375 22.5312 0 21.825 0 21V3C0 2.175 0.29375 1.46875 0.88125 0.88125C1.46875 0.29375 2.175 0 3 0H27C27.825 0 28.5312 0.29375 29.1187 0.88125C29.7062 1.46875 30 2.175 30 3V21C30 21.825 29.7062 22.5312 29.1187 23.1187C28.5312 23.7062 27.825 24 27 24H3ZM3 21H27V6H3V21ZM8.25 19.5L6.15 17.4L10.0125 13.5L6.1125 9.6L8.25 7.5L14.25 13.5L8.25 19.5ZM15 19.5V16.5H24V19.5H15Z" fill="#3C83F6" />
+                      </svg>
+                    </div> : <User size={14} />}
                   </div>
                   <span className="text-[11px] font-bold text-white uppercase tracking-tight">
-                    {msg.role === 'agent' ? 'LUMINAL AI' : 'YOU'}
+                    {msg.role === 'agent' ? 'Codexa' : 'YOU'}
                   </span>
                 </div>
                 <span className="text-[10px] text-tokyo-muted">{formatMessageTime(msg.timestamp)}</span>
@@ -306,7 +318,7 @@ const RightPanel = () => {
                       return !inline ? (
                         <CodeBlock className={className}>{children}</CodeBlock>
                       ) : (
-                        <code className="bg-tokyo-blue/10 text-tokyo-blue px-1.5 py-0.5 rounded text-[12px] font-mono" {...props}>
+                        <code className="bg-tokyo-blue/10 text-tokyo-blue px-1.5 py-0.5 text-[12px] font-mono" {...props}>
                           {children}
                         </code>
                       );
@@ -328,7 +340,7 @@ const RightPanel = () => {
                       </blockquote>
                     ),
                     table: ({ children }) => (
-                      <div className="overflow-x-auto my-4 border border-tokyo-border rounded-lg">
+                      <div className="overflow-x-auto my-4 border border-tokyo-border">
                         <table className="w-full text-left border-collapse text-[12px]">{children}</table>
                       </div>
                     ),
@@ -336,14 +348,14 @@ const RightPanel = () => {
                     td: ({ children }) => <td className="p-2 border-b border-tokyo-border">{children}</td>,
                   }}
                 >
-                  {msg.content}
+                  {msg.role === 'agent' ? getAgentDisplayContent(msg.content) : msg.content}
                 </ReactMarkdown>
                 
                 {msg.role === 'agent' && isStreaming && msg.id === messages[messages.length - 1].id && (
                   <div className="flex gap-1 mt-4 ml-1">
-                    <div className="size-1.5 bg-tokyo-blue rounded-full animate-bounce shrink-0" />
-                    <div className="size-1.5 bg-tokyo-blue rounded-full animate-bounce delay-75 shrink-0" />
-                    <div className="size-1.5 bg-tokyo-blue rounded-full animate-bounce delay-150 shrink-0" />
+                    <div className="size-1.5 bg-tokyo-blue animate-bounce shrink-0" />
+                    <div className="size-1.5 bg-tokyo-blue animate-bounce delay-75 shrink-0" />
+                    <div className="size-1.5 bg-tokyo-blue animate-bounce delay-150 shrink-0" />
                   </div>
                 )}
               </div>
@@ -354,10 +366,10 @@ const RightPanel = () => {
 
         {/* Input Area */}
         <div className="p-4 bg-tokyo-bg shrink-0">
-          <div className="relative bg-[#0b0f1a] border border-tokyo-border rounded-lg p-2 focus-within:border-tokyo-blue/50 transition-colors">
+          <div className="relative bg-[#0b0f1a] border border-tokyo-border p-2 focus-within:border-tokyo-blue/50 transition-colors">
             {attachment && (
-              <div className="flex items-center gap-2 p-2 bg-[#1e293b] border border-tokyo-border rounded mb-2 group">
-                <div className="size-8 bg-tokyo-blue/10 rounded flex items-center justify-center text-tokyo-blue">
+              <div className="flex items-center gap-2 p-2 bg-[#1e293b] border border-tokyo-border mb-2 group">
+                <div className="size-8 bg-tokyo-blue/10 flex items-center justify-center text-tokyo-blue">
                   {attachment.type.startsWith('image/') ? <ImageIcon size={16} /> : <Paperclip size={16} />}
                 </div>
                 <div className="flex-1 overflow-hidden">
@@ -366,7 +378,7 @@ const RightPanel = () => {
                 </div>
                 <button 
                   onClick={() => setAttachment(null)}
-                  className="p-1 hover:bg-white/5 rounded text-tokyo-muted hover:text-red-400 transition-colors"
+                  className="p-1 hover:bg-white/5 text-tokyo-muted hover:text-red-400 transition-colors"
                 >
                   <X size={14} />
                 </button>
@@ -391,17 +403,17 @@ const RightPanel = () => {
             />
             
             <div className="absolute bottom-2 left-2 flex items-center gap-3 text-tokyo-muted">
-              <div className="flex bg-[#1a1b26] border border-tokyo-border p-0.5 rounded-lg mr-1">
+              <div className="flex bg-[#1a1b26] border border-tokyo-border p-0.5 mr-1">
                 <button 
                   onClick={() => setMode('agent')}
-                  className={`px-2 py-1 text-[9px] font-bold rounded-md transition-all flex items-center gap-1 ${mode === 'agent' ? 'bg-tokyo-blue text-white shadow-lg' : 'text-tokyo-muted hover:text-white'}`}
+                  className={`px-2 py-1 text-[9px] font-bold transition-all flex items-center gap-1 ${mode === 'agent' ? 'bg-tokyo-blue text-white shadow-lg' : 'text-tokyo-muted hover:text-white'}`}
                 >
                   <Zap size={10} fill={mode === 'agent' ? 'currentColor' : 'none'} />
                   AGENT
                 </button>
                 <button 
                   onClick={() => setMode('ask')}
-                  className={`px-2 py-1 text-[9px] font-bold rounded-md transition-all flex items-center gap-1 ${mode === 'ask' ? 'bg-tokyo-blue text-white shadow-lg' : 'text-tokyo-muted hover:text-white'}`}
+                  className={`px-2 py-1 text-[9px] font-bold transition-all flex items-center gap-1 ${mode === 'ask' ? 'bg-tokyo-blue text-white shadow-lg' : 'text-tokyo-muted hover:text-white'}`}
                 >
                   <Send size={10} />
                   ASK
@@ -426,12 +438,11 @@ const RightPanel = () => {
             <button 
               onClick={handleSend}
               disabled={!input.trim() || isStreaming}
-              className="absolute bottom-2 right-2 bg-tokyo-blue hover:bg-tokyo-blue/90 disabled:bg-tokyo-blue/50 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded-md flex items-center gap-2 text-[11px] font-bold transition-all"
+              className="absolute bottom-2 right-2 bg-tokyo-blue hover:bg-tokyo-blue/90 disabled:bg-tokyo-blue/50 disabled:cursor-not-allowed text-white px-3 py-1.5 flex items-center gap-2 text-[11px] font-bold transition-all"
             >
               {isStreaming ? (
                 <>
                   <Loader2 size={12} className="animate-spin" />
-                  THINKING
                 </>
               ) : (
                 <>

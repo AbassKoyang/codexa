@@ -265,6 +265,15 @@ Continuation:
     }
   };
 
+  const handleDiffEditorDidMount = (editor: any) => {
+    const modifiedEditor = editor.getModifiedEditor();
+    
+    // Formatting works better after a short delay
+    setTimeout(() => {
+      modifiedEditor.getAction('editor.action.formatDocument')?.run();
+    }, 200);
+  };
+
   // -----------------------------
   // Search navigation jump
   // -----------------------------
@@ -305,23 +314,23 @@ Continuation:
   // -----------------------------
   if (activeFile.pendingContent) {
     return (
-      <div className="w-full h-full text-tokyo-fg bg-tokyo-bg flex flex-col overflow-hidden">
+      <div className="w-full h-full text-tokyo-fg bg-tokyo-bg flex flex-col overflow-hidden relative">
         <OpenFiles />
 
         {/* AI Suggestion Header */}
-        <div className="flex items-center justify-between px-6 py-2 bg-tokyo-blue/5 border-b border-tokyo-border animate-in fade-in slide-in-from-top-2 duration-300 shrink-0">
+        <div className="flex items-center justify-center px-6 py-2 bg1-tokyo-blue/5 border-b border-tokyo-border animate-in fade-in slide-in-from-top-2 duration-300 shrink-0 absolute bottom-0 left-1/2 -translate-x-1/2 z-10000">
           
           <div className="flex items-center gap-2">
             <button 
               onClick={handleRejectChanges}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-[11px] font-bold text-tokyo-muted hover:text-white hover:bg-red-500/20 hover:border-red-500/50 border border-transparent transition-all"
+              className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold text-tokyo-muted hover:text-white hover:bg-red-500/20 hover:border-red-500/50 border border-transparent transition-all cursor-pointer"
             >
               <X size={14} />
               REJECT
             </button>
             <button 
               onClick={handleAcceptChanges}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-md text-[11px] font-bold bg-tokyo-blue text-white hover:bg-tokyo-blue/80 shadow-lg shadow-tokyo-blue/20 transition-all"
+              className="flex items-center gap-2 px-4 py-1.5 text-[11px] font-bold bg-tokyo-blue text-white hover:bg-tokyo-blue/80 shadow-lg shadow-tokyo-blue/20 transition-all cursor-pointer"
             >
               <Check size={14} />
               ACCEPT
@@ -332,6 +341,7 @@ Continuation:
         <div className="flex-1">
           <DiffEditor
             height="100%"
+            onMount={handleDiffEditorDidMount}
             language={getLanguageFromExtension(activeFile.name)}
             theme={editorTheme}
             original={activeFile.content}
@@ -341,9 +351,11 @@ Continuation:
               fontSize: 14,
               fontFamily: "'Geist Mono', monospace",
               wordWrap: "on",
-              readOnly: true,
               scrollBeyondLastLine: false,
               renderSideBySide: true,
+              readOnly: true,
+              formatOnPaste: true,
+              formatOnType: true,
             }}
           />
         </div>
