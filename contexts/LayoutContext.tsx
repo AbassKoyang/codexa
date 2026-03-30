@@ -1,11 +1,11 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, Dispatch, SetStateAction } from "react";
 
 // --- Left Panel ---
 type leftPanelContextType = {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 const leftPanelContext = createContext<leftPanelContextType | undefined>(undefined);
@@ -31,7 +31,7 @@ export function useLeftPanelContext() {
 // --- Right Panel ---
 type rightPanelContextType = {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 const rightPanelContext = createContext<rightPanelContextType | undefined>(undefined);
@@ -57,10 +57,11 @@ export function useRightPanelContext() {
 // --- Bottom Panel ---
 type bottomPanelContextType = {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 const bottomPanelContext = createContext<bottomPanelContextType | undefined>(undefined);
+
 
 export function BottomPanelProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);

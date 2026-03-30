@@ -11,10 +11,8 @@ export const useCreateProject = () => {
             return response.data as Project;
         },
         onMutate: async (newProject) => {
-            // Cancel any outgoing refetches
             await queryClient.cancelQueries({ queryKey: ['projects'] });
 
-            // Snapshot the previous value
             const previousProjects = queryClient.getQueryData(['projects']);
 
             const optimisticProject = { 
@@ -26,11 +24,9 @@ export const useCreateProject = () => {
                 updated_at: new Date().toISOString()
             } as any;
 
-            // Optimistically update to the new value
             queryClient.setQueryData(['projects'], (old: any) => {
                 if (!old) return old;
 
-                // Handle InfiniteData structure (used by useFetchProjects)
                 if (old.pages && Array.isArray(old.pages)) {
                     return {
                         ...old,
@@ -42,7 +38,6 @@ export const useCreateProject = () => {
                     };
                 }
 
-                // Fallback for simple array structure
                 if (Array.isArray(old)) {
                     return [optimisticProject, ...old];
                 }
@@ -71,11 +66,64 @@ export const useUpdateProject = () => {
             return response.data as Project;
         },
         onSuccess: (data) => {
-             // We won't optimistically update since we rely on local FileTreeContext state
-             // But we should invalidate the query so the tree remains fresh on reload
              queryClient.invalidateQueries({ queryKey: ['project', data.slug] });
              queryClient.invalidateQueries({ queryKey: ['projects'] });
              queryClient.invalidateQueries({ queryKey: ['recent-projects'] });
+        }
+    });
+};
+
+export const useDeleteProject = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (slug: string) => {
+            await api.delete(`/api/projects/${slug}/`);
+        },
+        onSuccess: () => {
+             queryClient.invalidateQueries({ queryKey: ['projects'] });
+             queryClient.invalidateQueries({ queryKey: ['recent-projects'] });
+        }
+    });
+};
+
+export const useUpdateUser = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, data }: { id: number, data: any }) => {
+            const response = await api.patch(`/api/users/${id}/update/`, data);
+            return response.data as any;
+        },
+        onMutate: async (variables) => {
+            await queryClient.cancelQueries({ queryKey: ['session-user'] });
+            const previousUser = queryClient.getQueryData(['session-user']);
+
+            queryClient.setQueryData(['session-user'], (old: any) => {
+                if (!old) return old;
+                return { ...old, ...variables.data };
+            });
+
+            return { previousUser };
+        },
+        onError: (err, variables, context) => {
+            queryClient.setQueryData(['session-user'], context?.previousUser);
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['session-user'] });
+        }
+    });
+};
+
+export const useDeleteUser = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: number) => {
+            await api.delete(`/api/users/${id}/delete/`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['session-user'] });
         }
     });
 };

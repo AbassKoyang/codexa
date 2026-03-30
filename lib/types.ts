@@ -17,10 +17,10 @@ export interface Project {
   name: string;
   slug: string;
   description?: string;
-  lastEdited: string;
-  framework: string;
+  updated_at: string;
+  created_at: string;
+  language: string;
   status: ProjectStatus;
-  branch: string;
   thumbnail?: string;
   file_tree?: any;
 }

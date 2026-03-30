@@ -33,11 +33,20 @@ import { useFetchProjects } from '@/lib/queries';
 interface CreateProjectModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultLanguage?: string;
 }
 
-const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => {
+const CreateProjectModal = ({ open, onOpenChange, defaultLanguage }: CreateProjectModalProps) => {
   const [projectName, setProjectName] = useState('');
-  const [language, setLanguage] = useState('javascript');
+  const [language, setLanguage] = useState(defaultLanguage || 'javascript');
+  
+  React.useEffect(() => {
+    if (open && defaultLanguage) {
+      setLanguage(defaultLanguage);
+      setProjectName('');
+    }
+  }, [open, defaultLanguage]);
+
   const router = useRouter();
   const { user } = useAuth();
   const { data: projectsData } = useFetchProjects();
@@ -58,6 +67,7 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
     createProject.mutate({
       name: projectName,
       language: language,
+      thumbnail: LANGUAGE_CHOICES.find((choice) => choice.value === language)?.image,
       file_tree: {
         root: {
           type: "folder",
@@ -99,8 +109,6 @@ const CreateProjectModal = ({ open, onOpenChange }: CreateProjectModalProps) => 
                 type="button"
                 onClick={() => {
                   onOpenChange(false);
-                  // Trigger upgrade flow logic? Or just tell them to use the header button.
-                  // For now, let's keep it simple and just redirect or notify.
                   toast.info("Click 'Upgrade to Pro' in the header to continue.");
                 }}
                 className="w-full bg-linear-to-r from-tokyo-blue to-purple-500 text-white font-bold h-11 rounded-none"

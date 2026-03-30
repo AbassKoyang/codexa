@@ -22,28 +22,45 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useFetchProject } from '@/lib/queries';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/api';
 
 const Header = () => {
   const { activeFile, saveStatus } = useFileTree();
   const { editorTheme, setEditorTheme } = useSettings();
   const {isOpen, setIsOpen} = useLeftPanelContext();
   const { isOpen: isRightOpen, setIsOpen: setIsRightOpen } = useRightPanelContext();
-  const { isOpen: isBottomOpen, setIsOpen: setIsBottomOpen } = useBottomPanelContext();
-  const {user} = useAuth()
+  const {user, setUser} = useAuth()
   const searchParams = useSearchParams();
   const projectSlug = searchParams.get('project');
+  const queryClient = useQueryClient();
   
   const { data: project, isLoading, isError } = useFetchProject(projectSlug || undefined);
+
+  const handleSignout = async () => {
+    try {
+        await queryClient.cancelQueries({ queryKey: ['session-user'] })
+        const response = await api.post('/api/auth/logout/')
+        console.log(response.data)
+        setUser(null)
+        window.location.replace('/login')
+    } catch (error) {
+        console.log("Error logging out", error)
+    }
+  }
   
   return (
     <div className="fixed top-0 left-0 w-full">
       <div className="flex items-center justify-between h-[35px] bg-tokyo-bg text-tokyo-fg text-[13px] select-none font-sans px-2 border-b border-tokyo-border w-full z-[1000]">
       <div className="flex items-center space-x-3">
+        <Link href='/'>
           <div className="flex items-center justify-center p-0.5 border border-tokyo-blue border-dashed relative">
-          <svg className='size-5' width="30" height="24" viewBox="0 0 30 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 24C2.175 24 1.46875 23.7062 0.88125 23.1187C0.29375 22.5312 0 21.825 0 21V3C0 2.175 0.29375 1.46875 0.88125 0.88125C1.46875 0.29375 2.175 0 3 0H27C27.825 0 28.5312 0.29375 29.1187 0.88125C29.7062 1.46875 30 2.175 30 3V21C30 21.825 29.7062 22.5312 29.1187 23.1187C28.5312 23.7062 27.825 24 27 24H3ZM3 21H27V6H3V21ZM8.25 19.5L6.15 17.4L10.0125 13.5L6.1125 9.6L8.25 7.5L14.25 13.5L8.25 19.5ZM15 19.5V16.5H24V19.5H15Z" fill="#3C83F6" />
-          </svg>
-        </div>
+            <svg className='size-5' width="30" height="24" viewBox="0 0 30 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 24C2.175 24 1.46875 23.7062 0.88125 23.1187C0.29375 22.5312 0 21.825 0 21V3C0 2.175 0.29375 1.46875 0.88125 0.88125C1.46875 0.29375 2.175 0 3 0H27C27.825 0 28.5312 0.29375 29.1187 0.88125C29.7062 1.46875 30 2.175 30 3V21C30 21.825 29.7062 22.5312 29.1187 23.1187C28.5312 23.7062 27.825 24 27 24H3ZM3 21H27V6H3V21ZM8.25 19.5L6.15 17.4L10.0125 13.5L6.1125 9.6L8.25 7.5L14.25 13.5L8.25 19.5ZM15 19.5V16.5H24V19.5H15Z" fill="#3C83F6" />
+            </svg>
+          </div>
+        </Link>
         <nav className="hidden md:flex items-center space-x-0.5">
           {['File', 'Edit','Help'].map((item) => (
             <div key={item} className="px-2 py-1 hover:bg-tokyo-hover rounded cursor-pointer transition-colors duration-100">
@@ -73,16 +90,6 @@ const Header = () => {
               <PanelLeft className="size-5" strokeWidth={1.5} />
             </button>
           )}
-          
-          {isBottomOpen ? (
-            <button onClick={() => setIsBottomOpen(false)} className="flex items-center justify-center hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
-              <VscLayoutPanel className="text-xl rotate-180" />
-            </button>
-          ) : (
-            <button onClick={() => setIsBottomOpen(true)} className="flex items-center justify-center hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
-              <PanelBottom className="size-5" strokeWidth={1.5} />
-            </button>
-          )}
 
           {isRightOpen ? (
             <button onClick={() => setIsRightOpen(false)} className="flex items-center justify-center hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
@@ -109,7 +116,7 @@ const Header = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-tokyo-bg border-tokyo-border text-tokyo-fg">
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="hover:bg-tokyo-hover focus:bg-tokyo-hover cursor-pointer data-[state=open]:bg-tokyo-hover text-sm">
+                  <DropdownMenuSubTrigger className="hover:bg-tokyo-hover hover:text-tokyo-blue focus:bg-tokyo-hover focus:text-tokyo-blue cursor-pointer data-[state=open]:bg-tokyo-hover text-sm">
                     Theme
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent className="bg-tokyo-bg border-tokyo-border text-tokyo-fg max-h-[300px] overflow-y-auto w-48 scrollbar-hide">
@@ -117,36 +124,43 @@ const Header = () => {
                       <DropdownMenuItem 
                         key={id} 
                         onClick={() => setEditorTheme(id)}
-                        className={`hover:bg-tokyo-hover focus:bg-tokyo-hover cursor-pointer ${editorTheme === id ? 'text-tokyo-blue font-bold px-2' : ''}`}
+                        className={`hover:bg-tokyo-hover hover:text-tokyo-blue focus:bg-tokyo-hover focus:text-tokyo-blue cursor-pointer ${editorTheme === id ? 'text-tokyo-blue font-bold px-2' : ''}`}
                       >
                          {name}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
-                <DropdownMenuSeparator className="bg-tokyo-border" />
-                <DropdownMenuItem className="hover:bg-tokyo-hover focus:bg-tokyo-hover cursor-pointer text-sm">
-                  Open User Settings
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <button className="flex items-center gap-[2px] hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
-
-              <div className='size-[21px] rounded-full overflow-hidden cursor-pointer relative'>
-                <Image
-                className='object-cover'
-                fill
-                sizes="(max-width: 768px) 100px, 100px"
-                src={user.profile_pic_url}
-                loading='eager'
-                placeholder='blur'
-                blurDataURL='/assets/images/default-avatar.png'
-                alt='Profle Picture'
-                />
-              </div>
-              <ChevronDown className="size-4" strokeWidth={1.5} />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-[2px] hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
+                  <div className='size-[21px] rounded-full overflow-hidden cursor-pointer relative'>
+                    <Image
+                    className='object-cover'
+                    fill
+                    sizes="(max-width: 768px) 100px, 100px"
+                    src={user.profile_pic_url || '/assets/images/default-avatar.png'}
+                    loading='eager'
+                    placeholder='blur'
+                    blurDataURL='/assets/images/default-avatar.png'
+                    alt='Profile Picture'
+                    />
+                  </div>
+                  <ChevronDown className="size-4" strokeWidth={1.5} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40 bg-tokyo-bg border-tokyo-border text-tokyo-fg">
+                <DropdownMenuItem 
+                  onClick={handleSignout}
+                  className="hover:bg-tokyo-hover hover:text-tokyo-blue focus:bg-tokyo-hover focus:text-tokyo-blue cursor-pointer text-sm text-red-400 hover:text-red-400 focus:text-red-400"
+                >
+                  Log Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         )}
       </div>

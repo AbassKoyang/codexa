@@ -22,6 +22,7 @@ import { useSearchParams } from 'next/navigation';
 import { useFetchHistory } from '@/lib/queries';
 import { Message } from '@/lib/types';
 import { useFileTree } from '@/contexts/FileTreeContext';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const CodeBlock = ({ children, className }: { children: any; className?: string }) => {
   const [isCopied, setIsCopied] = useState(false);
@@ -91,7 +92,6 @@ const getAgentDisplayContent = (content: string) => {
     const parsed = JSON.parse(content);
     if (parsed.response) return parsed.response;
   } catch (e) {
-    // Regex for partial JSON streaming - find 'response' attribute
     const responseMatch = content.match(/"response":\s*"([\s\S]*?)(?:"[,\}]|$)/);
     if (responseMatch) {
       return responseMatch[1]
@@ -140,7 +140,6 @@ const RightPanel = () => {
   const handleSend = async () => {
     if (!input.trim() || isStreaming) return;
 
-    // Map existing messages to Gemini format for context
     const geminiHistory = messages.map(msg => ({
       role: msg.role === 'agent' ? 'model' : 'user',
       parts: [{ text: msg.content }]
@@ -205,12 +204,10 @@ const RightPanel = () => {
                 const { file_tree, modified_files, response } = parsed;
                 
                 if (file_tree && modified_files) {
-                  // Apply pending content only for modified files
                   file_tree.forEach((node: any) => {
                     if (node.type === 'file' && modified_files.includes(node.name)) {
                       setPendingContent(node.id, node.content);
                       
-                      // Also set active file if it's one of the modified ones
                       if (openFiles.some(f => f.id === node.id)) {
                         setActiveFileId(node.id);
                       }
@@ -279,9 +276,31 @@ const RightPanel = () => {
         {/* Chat History */}
         <div className="flex-1 overflow-y-auto p-4 space-y-8 scrollbar-hide">
           {isHistoryLoading ? (
-            <div className="h-full flex flex-col items-center justify-center space-y-4 opacity-50">
-               <Loader2 size={32} className="animate-spin text-tokyo-blue" />
-               <p className="text-xs font-medium uppercase tracking-widest text-tokyo-muted">Loading History...</p>
+            <div className="h-full flex flex-col space-y-6 pt-4 opacity-50">
+               <div className="flex flex-col items-end w-full space-y-2">
+                  <div className="flex items-center gap-2 justify-end w-full">
+                     <Skeleton className="h-3 w-10 bg-tokyo-muted/20" />
+                     <Skeleton className="size-6 bg-tokyo-purple/20" />
+                  </div>
+                  <Skeleton className="h-10 w-2/3 ml-auto bg-tokyo-muted/10" />
+               </div>
+               
+               <div className="flex flex-col items-start w-full space-y-2 mt-6">
+                  <div className="flex items-center gap-2">
+                     <Skeleton className="size-6 bg-tokyo-blue/20" />
+                     <Skeleton className="h-3 w-12 bg-tokyo-muted/20" />
+                  </div>
+                  <Skeleton className="h-20 w-[85%] bg-tokyo-blue/5" />
+                  <Skeleton className="h-12 w-[70%] bg-tokyo-blue/5" />
+               </div>
+
+               <div className="flex flex-col items-end w-full space-y-2 mt-6">
+                  <div className="flex items-center gap-2 justify-end w-full">
+                     <Skeleton className="h-3 w-10 bg-tokyo-muted/20" />
+                     <Skeleton className="size-6 bg-tokyo-purple/20" />
+                  </div>
+                  <Skeleton className="h-16 w-[60%] ml-auto bg-tokyo-muted/10" />
+               </div>
             </div>
           ) : messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center opacity-20 pointer-events-none px-8 text-center space-y-4">

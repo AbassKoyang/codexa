@@ -1,16 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Search, Plus, Sparkles, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Plus, Sparkles, Loader2, Command } from 'lucide-react';
 import CreateProjectModal from './CreateProjectModal';
+import ProjectSearchModal from './ProjectSearchModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { initializeSubscription } from '@/lib/api';
 import { toast } from 'sonner';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 const HomeHeader = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const { user, refreshUser } = useAuth();
@@ -25,12 +26,10 @@ const HomeHeader = () => {
         setIsVerifying(true);
         toast.loading("Verifying your subscription...", { id: 'verify-payment' });
         
-        // Wait a bit for the webhook to potentially process
         await new Promise(resolve => setTimeout(resolve, 3000));
         
         await refreshUser();
         
-        // Clear the query params
         router.replace('/');
         
         toast.dismiss('verify-payment');
@@ -60,12 +59,18 @@ const HomeHeader = () => {
   return (
     <header className="h-16 flex items-center justify-between px-8 bg-tokyo-bg border-b border-[#414868]/30">
       <div className="flex-1 max-w-xl relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-tokyo-muted" size={16} />
-        <input 
-          type="text" 
-          placeholder="Search projects..." 
-          className="w-full bg-[#1E293B] border border-[#414868]/50 py-2 pl-10 pr-4 text-sm text-tokyo-fg placeholder:text-tokyo-muted outline-none focus:border-tokyo-blue/50 transition-colors shadow-sm"
-        />
+        <button 
+          onClick={() => setIsSearchOpen(true)}
+          className="w-full flex items-center justify-between bg-[#1E293B] border border-[#414868]/50 py-2 pl-3 pr-4 text-sm text-tokyo-muted outline-none hover:border-tokyo-blue/50 transition-colors shadow-sm cursor-pointer group"
+        >
+          <div className="flex items-center gap-2">
+            <Search size={16} />
+            <span className="group-hover:text-tokyo-fg transition-colors">Search projects...</span>
+          </div>
+          <kbd className="hidden sm:flex py-0.5 items-center gap-1 rounded border border-[#414868]/60 bg-tokyo-bg px-0.5 font-mono text-[10px] font-medium text-tokyo-muted opacity-100">
+            <span className="text-[10px]">⌘</span>K
+          </kbd>
+        </button>
       </div>
       
       <div className="flex items-center gap-4">
@@ -90,6 +95,7 @@ const HomeHeader = () => {
       </div>
 
       <CreateProjectModal open={isModalOpen} onOpenChange={setIsModalOpen} />
+      <ProjectSearchModal open={isSearchOpen} setOpen={setIsSearchOpen} />
     </header>
   );
 };

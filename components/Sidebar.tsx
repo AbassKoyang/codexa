@@ -24,8 +24,8 @@ const Sidebar = () => {
     switch(activeTab) {
       case 'explorer': return <Explorer />;
       case 'search': return <Search />;
-      case 'source-control': return <SourceControl />;
-      case 'extensions': return <Extensions />;
+      case 'source-control': return null;
+      case 'extensions': return null;
       default: return null;
     }
   }

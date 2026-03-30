@@ -5,6 +5,7 @@ import { TabProvider } from "@/contexts/TabContext";
 import { FileTreeProvider } from "@/contexts/FileTreeContext";
 import { LeftPanelProvider, RightPanelProvider, BottomPanelProvider } from "@/contexts/LayoutContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import KeybindingsListener from "@/components/KeybindingsListener";
 
 const layout = ({
   children,
@@ -19,6 +20,7 @@ const layout = ({
             <RightPanelProvider>
               <BottomPanelProvider>
                 <TabProvider>
+                  <KeybindingsListener />
                   <Header />
                   <div className="flex flex-1 overflow-hidden">
                     <Sidebar />

@@ -50,7 +50,7 @@ const HomeSidebar = () => {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-[#414868]/50">
+      <div className="p-4 border-t border-[#414868]/50 space-y-2">
         <div className="flex items-center gap-3 p-2 hover:bg-white/5 transition-colors cursor-pointer">
           <div className="w-8 h-8 rounded-full bg-tokyo-active flex items-center justify-center overflow-hidden border border-[#414868]">
             {user?.profile_pic_url ? (
@@ -66,6 +66,23 @@ const HomeSidebar = () => {
             <p className="text-[10px] text-tokyo-muted truncate">{user?.email || 'user@dev.ai'}</p>
           </div>
         </div>
+        <button 
+          onClick={async () => {
+            try {
+              const { useQueryClient } = await import('@tanstack/react-query');
+              const { api } = await import('@/lib/api');
+              // Using basic fetch/api approach for logout client side, or just relying on api instance.
+              await api.post('/api/auth/logout/');
+              window.location.replace('/login');
+            } catch (error) {
+              console.log("Error logging out", error);
+            }
+          }}
+          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:bg-red-400/10 hover:text-red-300 transition-colors rounded-sm"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Log Out
+        </button>
       </div>
     </div>
   );

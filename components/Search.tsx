@@ -153,7 +153,7 @@ const Search = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search" 
-            className="w-full bg-tokyo-bg border border-tokyo-border rounded px-2 py-1.5 pr-8 text-sm text-tokyo-fg focus:outline-none focus:border-tokyo-blue transition-colors"
+            className="w-full bg-tokyo-bg border border-tokyo-border rounded-none px-2 py-1.5 pr-8 text-sm text-tokyo-fg focus:outline-none focus:border-tokyo-blue transition-colors"
           />
           {searchQuery && (
             <button 
@@ -171,13 +171,13 @@ const Search = () => {
             value={replaceQuery}
             onChange={(e) => setReplaceQuery(e.target.value)}
             placeholder="Replace" 
-            className="flex-1 bg-tokyo-bg border border-tokyo-border rounded px-2 py-1.5 text-sm text-tokyo-fg focus:outline-none focus:border-tokyo-blue transition-colors"
+            className="flex-1 bg-tokyo-bg border border-tokyo-border rounded-none px-2 py-1.5 text-sm text-tokyo-fg focus:outline-none focus:border-tokyo-blue transition-colors"
           />
           <button 
             onClick={handleReplaceAll}
             title="Replace All"
             disabled={!searchQuery}
-            className={`p-1.5 rounded border border-tokyo-border hover:bg-tokyo-bg transition-colors ${!searchQuery ? 'opacity-50 cursor-not-allowed' : 'text-tokyo-blue'}`}
+            className={`p-1.5 rounded-none border border-tokyo-border hover:bg-tokyo-bg transition-colors ${!searchQuery ? 'opacity-50 cursor-not-allowed' : 'text-tokyo-blue'}`}
           >
             <ReplaceAllIcon className="w-4 h-4" />
           </button>

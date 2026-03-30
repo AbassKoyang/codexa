@@ -9,6 +9,7 @@ import { useSearchParams } from 'next/navigation';
 import { useFetchProject } from '@/lib/queries';
 import { useProjectSave } from '@/lib/useProjectSave';
 import { toast } from 'sonner';
+import { Skeleton } from "@/components/ui/skeleton";
 
 type CreatingNodeState = { type: 'file' | 'folder'; parentId: string | null } | null;
 
@@ -132,18 +133,18 @@ const FileTreeNode = ({
     <div className="opacity-0 group-hover:opacity-100 flex items-center ml-auto shrink-0 transition-opacity">
       {node.type === 'folder' && (
         <>
-          <button onClick={(e) => handleCreateNew(e, 'file')} className="p-1 hover:bg-white/10 rounded-md text-tokyo-fg/70 hover:text-tokyo-fg" title="New File" aria-label="New File">
+          <button onClick={(e) => handleCreateNew(e, 'file')} className="p-1 hover:bg-white/10 -md text-tokyo-fg/70 hover:text-tokyo-fg" title="New File" aria-label="New File">
             <FilePlus size={14} strokeWidth={2} />
           </button>
-          <button onClick={(e) => handleCreateNew(e, 'folder')} className="p-1 hover:bg-white/10 rounded-md text-tokyo-fg/70 hover:text-tokyo-fg" title="New Folder" aria-label="New Folder">
+          <button onClick={(e) => handleCreateNew(e, 'folder')} className="p-1 hover:bg-white/10 -md text-tokyo-fg/70 hover:text-tokyo-fg" title="New Folder" aria-label="New Folder">
             <FolderPlus size={14} strokeWidth={2} />
           </button>
         </>
       )}
-      <button onClick={handleRenameStart} className="p-1 hover:bg-white/10 rounded-md text-tokyo-fg/70 hover:text-tokyo-fg" title="Rename" aria-label="Rename">
+      <button onClick={handleRenameStart} className="p-1 hover:bg-white/10 -md text-tokyo-fg/70 hover:text-tokyo-fg" title="Rename" aria-label="Rename">
         <Edit2 size={13} strokeWidth={2} />
       </button>
-      <button onClick={handleDelete} className="p-1 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-md ml-0.5" title="Delete" aria-label="Delete">
+      <button onClick={handleDelete} className="p-1 hover:bg-red-500/20 text-red-400 hover:text-red-300 -md ml-0.5" title="Delete" aria-label="Delete">
         <Trash2 size={13} strokeWidth={2} />
       </button>
     </div>
@@ -170,7 +171,7 @@ const FileTreeNode = ({
           onBlur={handleRenameSubmit}
           onKeyDown={handleKeyDown}
           onClick={(e) => e.stopPropagation()}
-          className="flex-1 min-w-0 bg-tokyo-bg/50 border border-tokyo-blue text-[13px] px-1 py-0 outline-none text-tokyo-fg rounded-sm"
+          className="flex-1 min-w-0 bg-tokyo-bg/50 border border-tokyo-blue text-[13px] px-1 py-0 outline-none text-tokyo-fg -sm"
         />
       ) : (
         <span className={`truncate text-[13px] mr-2 ${isActive ? 'text-tokyo-blue font-medium' : ''}`}>{node.name}</span>
@@ -232,7 +233,7 @@ const FileTreeNode = ({
                   onChange={(e) => setCreateValue(e.target.value)}
                   onBlur={handleCreateSubmit}
                   onKeyDown={handleCreateKeyDown}
-                  className="flex-1 min-w-0 w-full bg-tokyo-bg/50 border border-tokyo-blue text-[13px] px-1 py-0 outline-none text-tokyo-fg rounded-sm"
+                  className="flex-1 min-w-0 w-full bg-tokyo-bg/50 border border-tokyo-blue text-[13px] px-1 py-0 outline-none text-tokyo-fg -sm"
                   placeholder={`New ${creatingNode.type}...`}
                 />
               </div>
@@ -333,9 +334,16 @@ const Explorer = () => {
         
         <div className="flex-1 overflow-y-auto py-2 overflow-x-hidden">
           {isLoading ? (
-             <div className="flex flex-col items-center justify-center h-full px-6 text-center text-tokyo-fg/60">
-                <Loader2 className="w-6 h-6 animate-spin text-tokyo-blue" />
-                <p className="text-xs mt-2">Loading workspace...</p>
+             <div className="flex flex-col py-1 px-4 mt-2 space-y-4">
+                <Skeleton className="h-3 w-20 bg-tokyo-muted/20" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full bg-tokyo-muted/10" />
+                  <Skeleton className="h-4 w-[90%] ml-4 bg-tokyo-muted/10" />
+                  <Skeleton className="h-4 w-[70%] ml-8 bg-tokyo-muted/10" />
+                  <Skeleton className="h-4 w-[80%] ml-8 bg-tokyo-muted/10" />
+                  <Skeleton className="h-4 w-[95%] ml-4 bg-tokyo-muted/10" />
+                  <Skeleton className="h-4 w-full bg-tokyo-muted/10" />
+                </div>
              </div>
           ) : isError ? (
             <div className="flex flex-col items-center justify-center h-full px-6 text-center text-red-400">
@@ -346,14 +354,14 @@ const Explorer = () => {
               <p className="text-sm mb-4">No files open</p>
               <button 
                 onClick={() => handleCreateNewRoot('file')}
-                className="w-full flex items-center justify-center py-1.5 mb-2 rounded border border-tokyo-border bg-tokyo-bg hover:bg-tokyo-hover text-[13px] transition-colors"
+                className="w-full flex items-center justify-center py-1.5 mb-2  border border-tokyo-border bg-tokyo-bg hover:bg-tokyo-hover text-[13px] transition-colors"
               >
                 <FilePlus size={16} className="mr-2 opacity-70" />
                 Create File
               </button>
               <button 
                 onClick={() => handleCreateNewRoot('folder')}
-                className="w-full flex items-center justify-center py-1.5 rounded border border-tokyo-border bg-tokyo-bg hover:bg-tokyo-hover text-[13px] transition-colors"
+                className="w-full flex items-center justify-center py-1.5  border border-tokyo-border bg-tokyo-bg hover:bg-tokyo-hover text-[13px] transition-colors"
               >
                 <FolderPlus size={16} className="mr-2 opacity-70" />
                 Create Folder
@@ -367,7 +375,7 @@ const Explorer = () => {
                     onChange={(e) => setCreateValue(e.target.value)}
                     onBlur={handleCreateRootSubmit}
                     onKeyDown={handleCreateRootKeyDown}
-                    className="flex-1 w-full min-w-0 bg-tokyo-bg/50 border border-tokyo-blue text-[13px] px-2 py-1 outline-none text-tokyo-fg rounded-sm"
+                    className="flex-1 w-full min-w-0 bg-tokyo-bg/50 border border-tokyo-blue text-[13px] px-2 py-1 outline-none text-tokyo-fg -sm"
                     placeholder={`New ${creatingNode.type}...`}
                   />
                 </div>
@@ -378,8 +386,8 @@ const Explorer = () => {
               <div className="px-4 py-1 flex items-center justify-between group">
                 <span className="text-[11px] font-bold text-tokyo-fg/80 uppercase tracking-wider">{project ? project.name.toUpperCase() : 'PROJECT'}</span>
                 <div className="opacity-0 group-hover:opacity-100 flex space-x-0.5">
-                  <button onClick={() => handleCreateNewRoot('file')} className="p-1 hover:bg-tokyo-hover rounded-md text-tokyo-fg/70 hover:text-tokyo-fg transition-colors" title="New File" aria-label="New File"><FilePlus size={14} strokeWidth={2.5}/></button>
-                  <button onClick={() => handleCreateNewRoot('folder')} className="p-1 hover:bg-tokyo-hover rounded-md text-tokyo-fg/70 hover:text-tokyo-fg transition-colors" title="New Folder" aria-label="New Folder"><FolderPlus size={14} strokeWidth={2.5} /></button>
+                  <button onClick={() => handleCreateNewRoot('file')} className="p-1 hover:bg-tokyo-hover -md text-tokyo-fg/70 hover:text-tokyo-fg transition-colors" title="New File" aria-label="New File"><FilePlus size={14} strokeWidth={2.5}/></button>
+                  <button onClick={() => handleCreateNewRoot('folder')} className="p-1 hover:bg-tokyo-hover -md text-tokyo-fg/70 hover:text-tokyo-fg transition-colors" title="New Folder" aria-label="New Folder"><FolderPlus size={14} strokeWidth={2.5} /></button>
                 </div>
               </div>
               
@@ -409,7 +417,7 @@ const Explorer = () => {
                         onChange={(e) => setCreateValue(e.target.value)}
                         onBlur={handleCreateRootSubmit}
                         onKeyDown={handleCreateRootKeyDown}
-                        className="flex-1 w-full min-w-0 bg-tokyo-bg border border-tokyo-blue text-[13px] px-1 py-0 outline-none text-tokyo-fg rounded-sm"
+                        className="flex-1 w-full min-w-0 bg-tokyo-bg border border-tokyo-blue text-[13px] px-1 py-0 outline-none text-tokyo-fg -sm"
                         placeholder={`New ${creatingNode.type}...`}
                       />
                     </div>

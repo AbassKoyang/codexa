@@ -63,7 +63,9 @@ api.interceptors.response.use(
       } catch (refreshError) {
         isRefreshing = false;
 
-        window.location.href = "/login";
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
 
         return Promise.reject(refreshError);
       }
@@ -81,6 +83,25 @@ export const fetchSessionUser = async () : Promise<User> => {
     } catch (error) {
         console.error("error fetching user", error)
         throw error
+    }
+}
+
+export const updateUser = async (id: number, data: Partial<User>) : Promise<User> => {
+    try {
+        const response = await api.patch(`/api/users/${id}/update/`, data);
+        return response.data as User;
+    } catch (error) {
+        console.error("error updating user", error);
+        throw error;
+    }
+}
+
+export const deleteUser = async (id: number) : Promise<void> => {
+    try {
+        await api.delete(`/api/users/${id}/delete/`);
+    } catch (error) {
+        console.error("error deleting user", error);
+        throw error;
     }
 }
 
@@ -110,6 +131,15 @@ export const updateProject = async (slug: string, data: Partial<Project>) : Prom
         return response.data as Project;
     } catch (error) {
         console.error("error updating project", error);
+        throw error;
+    }
+}
+
+export const deleteProject = async (slug: string) : Promise<void> => {
+    try {
+        await api.delete(`/api/projects/${slug}/`);
+    } catch (error) {
+        console.error("error deleting project", error);
         throw error;
     }
 }

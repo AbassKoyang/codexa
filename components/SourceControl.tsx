@@ -52,7 +52,6 @@ const SourceControl = () => {
     }
 
     setIsGenerating(true);
-    // Simulate AI thinking
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     const messages = [
