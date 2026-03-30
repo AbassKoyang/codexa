@@ -8,9 +8,14 @@ import Link from 'next/link';
 import { url } from 'inspector';
 import { usePathname } from 'next/navigation';
 
-const HomeSidebar = () => {
+interface HomeSidebarProps {
+  className?: string;
+  onClose?: () => void;
+}
+
+const HomeSidebar = ({ className = "hidden md:flex", onClose }: HomeSidebarProps) => {
   const { user } = useAuth();
-  const pathname = usePathname()
+  const pathname = usePathname();
   
   const navItems = [
     { id: 'home', icon: Home, label: 'Home', url: '/' },
@@ -19,7 +24,7 @@ const HomeSidebar = () => {
   ];
 
   return (
-    <div className="w-[240px] h-full flex flex-col border-r border-[#414868] bg-[#0f172a] text-tokyo-fg select-none">
+    <div className={`w-[240px] h-full flex flex-col border-r border-[#414868] bg-[#0f172a] text-tokyo-fg select-none ${className}`}>
       <div className="p-6 flex items-center gap-3">
         <div className="flex items-center justify-center p-1 border border-tokyo-blue border-dashed relative">
           <svg className='size-6' width="30" height="24" viewBox="0 0 30 24" fill="none" xmlns="http://www.w3.org/2000/svg">
