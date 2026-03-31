@@ -104,7 +104,7 @@ const getAgentDisplayContent = (content: string) => {
 };
 
 const RightPanel = () => {
-  const { isOpen } = useRightPanelContext();
+  const { isOpen, setIsOpen } = useRightPanelContext();
   const { fileTree, openFiles, setPendingContent, setActiveFileId } = useFileTree();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -257,9 +257,9 @@ const RightPanel = () => {
 
   return (
     <div className={`
-      ${isOpen ? 'w-[400px]' : 'w-0'} 
-      h-full bg-tokyo-bg flex flex-col border-l border-tokyo-border text-tokyo-fg 
-      transition-[width] duration-300 ease-in-out overflow-hidden select-none shrink-0
+      ${isOpen ? 'w-full' : 'w-0'} 
+      h-[calc(100%-36px)] bg-tokyo-bg flex flex-col border-l border-tokyo-border text-tokyo-fg 
+      transition-[width] duration-300 ease-in-out overflow-hidden select-none shrink-0 fixed bottom-0 right-0 z-2000
     `}>
       <div className="flex flex-col h-full w-full min-w-[400px]">
         {/* Header */}
@@ -268,8 +268,11 @@ const RightPanel = () => {
             <Bot size={18} className="text-tokyo-blue" />
             <span className="text-xs font-bold tracking-wider text-white uppercase">AI ASSISTANT</span>
           </div>
-          <button className="text-tokyo-muted hover:text-white transition-colors">
+          <button className="hidden lg:block text-tokyo-muted hover:text-white transition-colors">
             <MoreVertical size={16} />
+          </button>
+          <button onClick={() => setIsOpen(false)} className="lg:hidden text-tokyo-muted hover:text-white transition-colors">
+            <X size={16} />
           </button>
         </div>
 

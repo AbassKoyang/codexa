@@ -9,13 +9,13 @@ import { url } from 'inspector';
 import { usePathname } from 'next/navigation';
 
 interface HomeSidebarProps {
-  className?: string;
+  isOpen?: boolean;
   onClose?: () => void;
 }
 
-const HomeSidebar = ({ className = "hidden md:flex", onClose }: HomeSidebarProps) => {
+const HomeSidebar = ({ isOpen, onClose }: HomeSidebarProps) => {
   const { user } = useAuth();
-  const pathname = usePathname();
+  const pathname = usePathname()
   
   const navItems = [
     { id: 'home', icon: Home, label: 'Home', url: '/' },
@@ -24,20 +24,44 @@ const HomeSidebar = ({ className = "hidden md:flex", onClose }: HomeSidebarProps
   ];
 
   return (
-    <div className={`w-[240px] h-full flex flex-col border-r border-[#414868] bg-[#0f172a] text-tokyo-fg select-none ${className}`}>
-      <div className="p-6 flex items-center gap-3">
-        <div className="flex items-center justify-center p-1 border border-tokyo-blue border-dashed relative">
-          <svg className='size-6' width="30" height="24" viewBox="0 0 30 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 24C2.175 24 1.46875 23.7062 0.88125 23.1187C0.29375 22.5312 0 21.825 0 21V3C0 2.175 0.29375 1.46875 0.88125 0.88125C1.46875 0.29375 2.175 0 3 0H27C27.825 0 28.5312 0.29375 29.1187 0.88125C29.7062 1.46875 30 2.175 30 3V21C30 21.825 29.7062 22.5312 29.1187 23.1187C28.5312 23.7062 27.825 24 27 24H3ZM3 21H27V6H3V21ZM8.25 19.5L6.15 17.4L10.0125 13.5L6.1125 9.6L8.25 7.5L14.25 13.5L8.25 19.5ZM15 19.5V16.5H24V19.5H15Z" fill="#3C83F6" />
-          </svg>
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
+          onClick={onClose}
+        />
+      )}
+
+      <div className={`
+        fixed inset-y-0 left-0 z-50 w-[240px] bg-[#0f172a] border-r border-[#414868] 
+        transition-transform duration-300 ease-in-out md:relative md:translate-x-0
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        flex flex-col text-tokyo-fg select-none
+      `}>
+        <div className="p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center p-1 border border-tokyo-blue border-dashed relative">
+              <svg className='size-6' width="30" height="24" viewBox="0 0 30 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 24C2.175 24 1.46875 23.7062 0.88125 23.1187C0.29375 22.5312 0 21.825 0 21V3C0 2.175 0.29375 1.46875 0.88125 0.88125C1.46875 0.29375 2.175 0 3 0H27C27.825 0 28.5312 0.29375 29.1187 0.88125C29.7062 1.46875 30 2.175 30 3V21C30 21.825 29.7062 22.5312 29.1187 23.1187C28.5312 23.7062 27.825 24 27 24H3ZM3 21H27V6H3V21ZM8.25 19.5L6.15 17.4L10.0125 13.5L6.1125 9.6L8.25 7.5L14.25 13.5L8.25 19.5ZM15 19.5V16.5H24V19.5H15Z" fill="#3C83F6" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="font-bold text-sm tracking-tight text-white">Codexa AI</h1>
+              <p className="text-[10px] text-tokyo-blue font-bold tracking-widest uppercase">
+                {user?.plan ? `${user.plan} Plan` : 'Loading...'}
+              </p>
+            </div>
+          </div>
+          
+          {/* Close button - mobile only */}
+          <button 
+            onClick={onClose}
+            className="md:hidden p-2 text-tokyo-muted hover:text-white"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
-        <div>
-          <h1 className="font-bold text-sm tracking-tight text-white">Codexa AI</h1>
-          <p className="text-[10px] text-tokyo-blue font-bold tracking-widest uppercase">
-            {user?.plan ? `${user.plan} Plan` : 'Loading...'}
-          </p>
-        </div>
-      </div>
 
       <nav className="flex-1 px-3 space-y-1 mt-4">
         {navItems.map((item) => (
@@ -53,6 +77,20 @@ const HomeSidebar = ({ className = "hidden md:flex", onClose }: HomeSidebarProps
             {item.label}
           </Link>
         ))}
+
+        {user?.plan === 'free' && (
+          <button 
+            onClick={() => {
+               // Reusing the upgrade logic if possible or just navigating to a checkout if implemented
+               // For now, let's keep it consistent with the header's handleUpgrade but in sidebar
+               // Since we don't want to duplicate too much logic, maybe just a link or trigger
+            }}
+            className="w-full mt-4 flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-white bg-linear-to-r from-tokyo-blue to-purple-500 hover:opacity-90 transition-all sm:hidden"
+          >
+            <Sparkles size={18} />
+            Upgrade to Pro
+          </button>
+        )}
       </nav>
 
       <div className="p-4 border-t border-[#414868]/50 space-y-2">
@@ -90,6 +128,7 @@ const HomeSidebar = ({ className = "hidden md:flex", onClose }: HomeSidebarProps
         </button>
       </div>
     </div>
+    </>
   );
 };
 

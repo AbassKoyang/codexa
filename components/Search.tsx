@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search as SearchIcon, ChevronRight, ChevronDown, Replace as ReplaceIcon, ChevronLast as ReplaceAllIcon, X } from 'lucide-react';
 import { useFileTree, FileNode } from '@/contexts/FileTreeContext';
+import { useLeftPanelContext } from '@/contexts/LayoutContext';
 
 interface SearchResult {
   fileId: string;
@@ -28,6 +29,8 @@ const Search = () => {
   const [replaceQuery, setReplaceQuery] = useState('');
   const [fileResults, setFileResults] = useState<FileResults[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const {isOpen} = useLeftPanelContext();
+  
 
   const performSearch = (query: string) => {
     if (!query) {
@@ -141,7 +144,7 @@ const Search = () => {
   );
 
   return (
-    <div className="w-[300px] h-full bg-tokyo-panel flex flex-col border-r border-tokyo-border text-tokyo-fg overflow-hidden">
+    <div className={`${isOpen ? 'w-[300px]' : 'w-0'} h-full bg-tokyo-bg flex flex-col border-r border-tokyo-border text-tokyo-fg overflow-hidden`}>
       <div className="flex items-center px-4 h-[35px] text-[11px] font-semibold tracking-wide text-tokyo-fg/60 uppercase shrink-0">
         Search
       </div>

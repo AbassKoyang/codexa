@@ -96,8 +96,8 @@ const AllProjects = () => {
             </div>
             
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-white truncate group-hover:text-tokyo-blue transition-colors">{project.name}</h3>
-              <p className="text-xs text-tokyo-muted mt-0.5">
+              <h3 className="font-bold text-sm sm:text-base text-white truncate group-hover:text-tokyo-blue transition-colors">{project.name}</h3>
+              <p className="text-[10px] sm:text-xs text-tokyo-muted mt-0.5">
                 Updated {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(project.updated_at))}
               </p>
             </div>

@@ -11,6 +11,7 @@ import { useLeftPanelContext } from '@/contexts/LayoutContext';
 
 const Sidebar = () => {
   const { activeTab, setActiveTab } = useTabContext();
+  const {isOpen, setIsOpen} = useLeftPanelContext();
   
 
   const topIcons = [
@@ -31,14 +32,14 @@ const Sidebar = () => {
   }
 
   return (
-    <div className="flex h-[calc(100vh-35px)] select-none font-sans bg-tokyo-bg self-end">
-      <div className="w-[48px] h-full bg-tokyo-panel flex flex-col items-center py-2 space-y-4 border-r border-tokyo-border z-10">
+    <div className="fixed lg:static flex h-[calc(100vh-35px)] select-none font-sans bg-tokyo-bg self-end z-1000">
+      <div className="w-[40px] lg:w-[48px] h-full bg-tokyo-panel flex flex-col items-center py-2 space-y-4 border-r border-tokyo-border z-10">
         {topIcons.map(({ id, Icon }) => {
           const isActive = activeTab === id;
           return (
             <div 
               key={id}
-              onClick={() => setActiveTab(id)}
+              onClick={() => {setActiveTab(id); if(isOpen && isActive) setIsOpen(false); else {setIsOpen(true)}}}
               className={`relative group cursor-pointer flex items-center justify-center w-full h-12 transition-colors ${
                 isActive ? 'text-tokyo-fg' : 'text-tokyo-muted hover:text-tokyo-fg'
               }`}
@@ -46,7 +47,7 @@ const Sidebar = () => {
               {isActive && (
                 <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-tokyo-blue"></div>
               )}
-              <Icon className="w-6 h-6" strokeWidth={1.5} />
+              <Icon className="size-4 lg:size-6" strokeWidth={1.5} />
             </div>
           );
         })}

@@ -9,6 +9,7 @@ import { LANGUAGE_CHOICES } from "@/lib/constants";
 import Image from "next/image";
 
 export default function TemplatesPage() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string | undefined>(undefined);
 
@@ -19,15 +20,15 @@ export default function TemplatesPage() {
 
   return (
     <ProtectedRoute>
-      <div className="flex h-screen bg-tokyo-bg text-tokyo-fg overflow-hidden selection:bg-tokyo-blue/30">
-        <HomeSidebar />
-        <div className="flex-1 flex flex-col h-full overflow-hidden">
-          <HomeHeader />
-          <main className="flex-1 overflow-y-auto bg-tokyo-bg p-8 custom-scrollbar">
-            <div className="max-w-6xl mx-auto space-y-12 pb-12">
+      <div className="flex h-screen bg-tokyo-bg text-tokyo-fg overflow-hidden selection:bg-tokyo-blue/30 relative">
+        <HomeSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <div className="flex-1 flex flex-col h-full overflow-hidden w-full">
+          <HomeHeader onMenuClick={() => setIsSidebarOpen(true)} />
+          <main className="flex-1 overflow-y-auto bg-tokyo-bg p-4 sm:p-8 custom-scrollbar">
+            <div className="max-w-6xl mx-auto space-y-8 sm:space-y-12 pb-12">
               <div>
-                <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Templates</h1>
-                <p className="text-tokyo-muted">Jumpstart your next project with pre-configured language frameworks.</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">Templates</h1>
+                <p className="text-sm text-tokyo-muted">Jumpstart your next project with pre-configured language frameworks.</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

@@ -9,7 +9,11 @@ import { initializeSubscription } from '@/lib/api';
 import { toast } from 'sonner';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-const HomeHeader = () => {
+interface HomeHeaderProps {
+  onMenuClick?: () => void;
+}
+
+const HomeHeader = ({ onMenuClick }: HomeHeaderProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
@@ -57,28 +61,38 @@ const HomeHeader = () => {
   };
 
   return (
-    <header className="h-16 flex items-center justify-between px-8 bg-tokyo-bg border-b border-[#414868]/30">
-      <div className="flex-1 max-w-xl relative">
+    <header className="h-16 flex items-center justify-between px-4 sm:px-8 bg-tokyo-bg border-b border-[#414868]/30 shrink-0">
+      <div className="flex items-center gap-4 flex-1 max-w-xl">
+        <button 
+          onClick={onMenuClick}
+          className="md:hidden p-2 -ml-2 text-tokyo-muted hover:text-white transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+
+        <div className="flex-1 relative">
         <button 
           onClick={() => setIsSearchOpen(true)}
           className="w-full flex items-center justify-between bg-[#1E293B] border border-[#414868]/50 py-2 pl-3 pr-4 text-sm text-tokyo-muted outline-none hover:border-tokyo-blue/50 transition-colors shadow-sm cursor-pointer group"
         >
           <div className="flex items-center gap-2">
             <Search size={16} />
-            <span className="group-hover:text-tokyo-fg transition-colors">Search projects...</span>
+            <span className="hidden sm:inline group-hover:text-tokyo-fg transition-colors">Search projects...</span>
+            <span className="sm:hidden group-hover:text-tokyo-fg transition-colors">Search...</span>
           </div>
-          <kbd className="hidden sm:flex py-0.5 items-center gap-1 rounded border border-[#414868]/60 bg-tokyo-bg px-0.5 font-mono text-[10px] font-medium text-tokyo-muted opacity-100">
+          <kbd className="hidden lg:flex py-0.5 items-center gap-1 rounded border border-[#414868]/60 bg-tokyo-bg px-0.5 font-mono text-[10px] font-medium text-tokyo-muted opacity-100">
             <span className="text-[10px]">⌘</span>K
           </kbd>
         </button>
       </div>
+      </div>
       
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 shrink-0 ml-4">
         {user?.plan === 'free' && (
           <button 
             onClick={handleUpgrade}
             disabled={isUpgrading}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-linear-to-r from-tokyo-blue to-purple-500 hover:scale-105 transition-all shadow-lg shadow-tokyo-blue/20 disabled:opacity-50 disabled:hover:scale-100"
+            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-linear-to-r from-tokyo-blue to-purple-500 hover:scale-105 transition-all shadow-lg shadow-tokyo-blue/20 disabled:opacity-50 disabled:hover:scale-100"
           >
             {isUpgrading ? <Loader2 className="size-4 animate-spin" /> : <Sparkles size={16} />}
             {isUpgrading ? 'Redirecting...' : 'Upgrade to Pro'}
@@ -87,10 +101,10 @@ const HomeHeader = () => {
         
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-tokyo-blue hover:bg-tokyo-blue/90 text-white px-4 py-2 text-sm font-semibold transition-all shadow-lg shadow-tokyo-blue/20"
+          className="flex items-center gap-2 bg-tokyo-blue hover:bg-tokyo-blue/90 text-white px-3 sm:px-4 py-2 text-sm font-semibold transition-all shadow-lg shadow-tokyo-blue/20"
         >
           <Plus size={18} />
-          New Project
+          <span className="hidden sm:inline">New Project</span>
         </button>
       </div>
 

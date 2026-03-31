@@ -31,6 +31,7 @@ const FileTreeNode = ({
   const [isOpen, setIsOpen] = useState(false);
   const [renameValue, setRenameValue] = useState(node.name);
   const { addNode, deleteNode, renameNode, activeFileId, setActiveFileId, addFileToOpenFiles } = useFileTree();
+  const { setIsOpen: setIsLeftPanelOpen } = useLeftPanelContext();
   const inputRef = useRef<HTMLInputElement>(null);
   const createInputRef = useRef<HTMLInputElement>(null);
   const [createValue, setCreateValue] = useState("");
@@ -184,7 +185,7 @@ const FileTreeNode = ({
       <div 
         className={`flex items-center py-0.5 cursor-pointer group w-full ${isActive ? 'bg-tokyo-hover/80 text-white' : 'hover:bg-tokyo-hover text-tokyo-fg/90'}`}
         style={{ paddingLeft }}
-        onClick={() => {setActiveFileId(node.id); addFileToOpenFiles(node.id)}}
+        onClick={() => {setActiveFileId(node.id); addFileToOpenFiles(node.id); if(window.innerWidth < 700) setIsLeftPanelOpen(false)}}
       >
         <div className="flex items-center flex-1 min-w-0">
           {renderContent()}

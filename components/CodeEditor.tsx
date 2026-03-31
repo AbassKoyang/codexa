@@ -287,17 +287,17 @@ Continuation:
   // -----------------------------
   if (!activeFile || activeFile.type !== "file") {
     return (
-      <div className="w-full h-full text-tokyo-fg bg-tokyo-bg flex flex-col">
+      <div className="w-full h-full pl-14 text-tokyo-fg bg-tokyo-bg flex flex-col">
         <OpenFiles />
 
         <div className="flex-1 flex items-center justify-center text-tokyo-fg/50 bg-tokyo-bg">
           <div className="text-center flex items-center justify-center flex-col">
-            <div className="flex items-center justify-center p-2 border border-tokyo-blue border-dashed relative w-fit mb-4">
-              <svg className='size-8' width="30" height="24" viewBox="0 0 30 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <div className="flex items-center justify-center p-0.5 lg:p-2 border border-tokyo-blue border-dashed relative w-fit mb-4">
+              <svg className='size-6 lg:size-8' width="30" height="24" viewBox="0 0 30 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M3 24C2.175 24 1.46875 23.7062 0.88125 23.1187C0.29375 22.5312 0 21.825 0 21V3C0 2.175 0.29375 1.46875 0.88125 0.88125C1.46875 0.29375 2.175 0 3 0H27C27.825 0 28.5312 0.29375 29.1187 0.88125C29.7062 1.46875 30 2.175 30 3V21C30 21.825 29.7062 22.5312 29.1187 23.1187C28.5312 23.7062 27.825 24 27 24H3ZM3 21H27V6H3V21ZM8.25 19.5L6.15 17.4L10.0125 13.5L6.1125 9.6L8.25 7.5L14.25 13.5L8.25 19.5ZM15 19.5V16.5H24V19.5H15Z" fill="#3C83F6" />
               </svg>
             </div>
-            <p>Open a file from the Explorer to start editing</p>
+            <p className="text-xs lg:text-base max-w-[200px] lg:max-w-fit">Open a file from the Explorer to start editing</p>
           </div>
         </div>
       </div>
@@ -309,7 +309,7 @@ Continuation:
   // -----------------------------
   if (activeFile.pendingContent) {
     return (
-      <div className="w-full h-full text-tokyo-fg bg-tokyo-bg flex flex-col overflow-hidden relative">
+      <div className="w-full h-full pl-14 text-tokyo-fg bg-tokyo-bg flex flex-col overflow-hidden relative">
         <OpenFiles />
 
         <div className="flex items-center justify-center px-6 py-2 bg1-tokyo-blue/5 border-b border-tokyo-border animate-in fade-in slide-in-from-top-2 duration-300 shrink-0 absolute bottom-0 left-1/2 -translate-x-1/2 z-10000">
@@ -358,7 +358,7 @@ Continuation:
   }
 
   return (
-    <div className="w-full h-full text-tokyo-fg bg-tokyo-bg flex flex-col">
+    <div className="w-full h-full pl-14 text-tokyo-fg bg-tokyo-bg flex flex-col">
       <OpenFiles />
 
       <Editor

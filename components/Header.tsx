@@ -74,9 +74,9 @@ const Header = () => {
         <span className="truncate">
           {activeFile ? `${activeFile.name} - ${project?.name} - Codexa` : project?.name + ' - Codexa'}
         </span>
-        {saveStatus === 'saving' && <span className="ml-2 text-xs text-tokyo-muted bg-white/5 px-1.5 py-0.5 rounded-sm">Saving...</span>}
-        {saveStatus === 'saved' && <span className="ml-2 text-xs text-tokyo-blue bg-tokyo-blue/10 px-1.5 py-0.5 rounded-sm">Saved</span>}
-        {saveStatus === 'error' && <span className="ml-2 text-xs text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-sm">Failed to save</span>}
+        {saveStatus === 'saving' && <span className="ml-2 text-[10px] lg:text-xs text-tokyo-muted bg-white/5 px-1.5 py-0.5 rounded-sm">Saving...</span>}
+        {saveStatus === 'saved' && <span className="ml-2 text-[10px] lg:text-xs text-tokyo-blue bg-tokyo-blue/10 px-1.5 py-0.5 rounded-sm">Saved</span>}
+        {saveStatus === 'error' && <span className="ml-2 text-[10px] lg:text-xs text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded-sm">Failed to save</span>}
       </div>
 
       <div className="flex items-center gap-2">
@@ -104,7 +104,7 @@ const Header = () => {
         <div className="h-4 w-px bg-tokyo-border"></div>
         {user && (
           <div className="flex items-center gap-1">
-            <button className="flex items-center justify-center hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
+            <button className="hidden lg:flex items-center justify-center hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-1 rounded-md">
               <Chromium className="size-5" strokeWidth={1.5} />
             </button>
             
