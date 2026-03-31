@@ -70,7 +70,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (user) {
       window.google?.accounts.id.cancel();
-      window.location.replace('/feed')
+      window.location.replace('/')
     }
   }, [user]);
 

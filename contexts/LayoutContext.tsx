@@ -11,7 +11,7 @@ type leftPanelContextType = {
 const leftPanelContext = createContext<leftPanelContextType | undefined>(undefined);
 
 export function LeftPanelProvider({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <leftPanelContext.Provider value={{ isOpen, setIsOpen }}>

@@ -261,7 +261,7 @@ const RightPanel = () => {
       h-[calc(100%-36px)] lg:h-full bg-tokyo-bg flex flex-col border-l border-tokyo-border text-tokyo-fg 
       transition-[width] duration-300 ease-in-out overflow-hidden select-none shrink-0 fixed lg:static bottom-0 right-0 z-[5000] lg:z-[10]
     `}>
-      <div className="flex flex-col h-full w-full min-w-[400px]">
+      <div className="flex flex-col h-full w-full lg:min-w-[400px]">
         {/* Header */}
         <div className="flex items-center justify-between px-4 h-[45px] border-b border-tokyo-border shrink-0">
           <div className="flex items-center gap-2">
