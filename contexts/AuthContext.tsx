@@ -3,55 +3,64 @@
 import { fetchSessionUser } from '@/lib/api'
 import { useFetchSessionUser } from '@/lib/queries'
 import { User } from '@/lib/types'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useMemo } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 
-const AuthContext = createContext<{
+type AuthContextType = {
   user: User | null
-  loading: boolean,
-  setUser: (user: User | null) => void,
+  loading: boolean
+  setUser: (user: User | null) => void
   refreshUser: () => Promise<void>
-}>({
-  user: null,
-  loading: true,
-  setUser: () => {},
-  refreshUser: async () => {}
-})
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const {data, isLoading, isError, error} = useFetchSessionUser()
+  const queryClient = useQueryClient()
+
+  const {
+    data: user,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+  } = useFetchSessionUser()
+
+  const loading = isLoading || isFetching
+
+  const setUser = (user: User | null) => {
+    queryClient.setQueryData(['session-user'], user)
+  }
 
   const refreshUser = async () => {
-    setLoading(true)
     try {
-      const updatedUser = await fetchSessionUser()
-      setUser(updatedUser)
+      await queryClient.invalidateQueries({ queryKey: ['session-user'] })
     } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
+      console.error('Failed to refresh user:', err)
     }
   }
 
-  useEffect(() => {
-    setLoading(true)
-    const getUser = async () => {
-      if(isLoading) setLoading(true)
-      if(data) {
-        setUser(data)
-        setLoading(false)
-      }
-      if(isError) console.error(error)
-    }
-    getUser();
-  }, [data])
+  if (isError) {
+    console.error(error)
+  }
 
-  return (
-    <AuthContext.Provider value={{ user, loading, setUser, refreshUser }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user: user ?? null,
+      loading,
+      setUser,
+      refreshUser,
+    }),
+    [user, loading]
   )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export const useAuth = () => useContext(AuthContext)
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}
