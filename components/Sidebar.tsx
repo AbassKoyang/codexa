@@ -8,6 +8,7 @@ import Search from './Search';
 import SourceControl from './SourceControl';
 import Extensions from './Extensions';
 import { useLeftPanelContext } from '@/contexts/LayoutContext';
+import Link from 'next/link';
 
 const Sidebar = () => {
   const { activeTab, setActiveTab } = useTabContext();
@@ -54,7 +55,7 @@ const Sidebar = () => {
 
         <div className="flex-1"></div>
 
-        <div 
+        <Link href='/settings' 
           onClick={() => setActiveTab('settings')}
           className={`relative group cursor-pointer flex items-center justify-center w-full h-12 transition-colors ${
             activeTab === 'settings' ? 'text-tokyo-fg' : 'text-tokyo-muted hover:text-tokyo-fg'
@@ -64,7 +65,7 @@ const Sidebar = () => {
             <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-tokyo-blue"></div>
           )}
           <Settings className="w-6 h-6" strokeWidth={1.5} />
-        </div>
+        </Link>
       </div>
 
       {renderActiveTab()}

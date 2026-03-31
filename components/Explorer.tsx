@@ -247,7 +247,7 @@ const FileTreeNode = ({
 }
 
 const Explorer = () => {
-  const { fileTree, addNode, setFileTree, setActiveFileId, setOpenFiles } = useFileTree();
+  const { fileTree, addNode, setFileTree, setActiveFileId, setOpenFiles, isLoaded, setIsLoaded } = useFileTree();
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [creatingNode, setCreatingNode] = useState<CreatingNodeState>(null);
   const [createValue, setCreateValue] = useState("");
@@ -260,8 +260,6 @@ const Explorer = () => {
   const projectSlug = searchParams.get('project');
   
   const { data: project, isLoading, isError } = useFetchProject(projectSlug || undefined);
-
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (project && project.file_tree && project.file_tree.root) {
@@ -283,7 +281,7 @@ const Explorer = () => {
           setIsLoaded(true);
       }
     }
-  }, [project, setFileTree, setActiveFileId, setOpenFiles, isLoaded]);
+  }, [project, setFileTree, setActiveFileId, setOpenFiles, isLoaded, setIsLoaded]);
 
   useEffect(() => {
     if (creatingNode?.parentId === null && createRootInputRef.current) {

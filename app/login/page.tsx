@@ -94,11 +94,6 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-8 p-6 sm:p-8 bg-[#0F172A]/50 lg:bg-tokyo-bg shadow-xs w-full lg:w-[500px]">
-          <div className="w-full h-[150px] bg-linear-90 flex items-center justify-center from-[#3C83F6]/20 via-[#3C83F6]/5 to-[#3C83F6]/0 border border-[#3C83F6]/10 lg:hidden">
-            <svg width="55" height="55" viewBox="0 0 55 55" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M45 20L41.875 13.125L35 10L41.875 6.875L45 0L48.125 6.875L55 10L48.125 13.125L45 20ZM45 55L41.875 48.125L35 45L41.875 41.875L45 35L48.125 41.875L55 45L48.125 48.125L45 55ZM20 47.5L13.75 33.75L0 27.5L13.75 21.25L20 7.5L26.25 21.25L40 27.5L26.25 33.75L20 47.5ZM20 35.375L22.5 30L27.875 27.5L22.5 25L20 19.625L17.5 25L12.125 27.5L17.5 30L20 35.375Z" fill="#3C83F6" fill-opacity="0.4"/>
-            </svg>
-          </div>
           <div className="w-full mt-3">
             <div className="w-full" ref={googleButtonRef}></div>
           </div>

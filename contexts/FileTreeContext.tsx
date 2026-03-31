@@ -42,6 +42,8 @@ interface FileTreeContextType {
   rejectChanges: (id: string) => FileNode[];
   searchTarget: { fileId: string; line: number } | null;
   setSearchTarget: (target: { fileId: string; line: number } | null) => void;
+  isLoaded: boolean;
+  setIsLoaded: (val: boolean) => void;
 }
 
 const FileTreeContext = createContext<FileTreeContextType | undefined>(undefined);
@@ -54,6 +56,7 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
   const [openFiles, setOpenFiles] = useState<FileNode[]>([]);
   const [saveStatus, setSaveStatus] = useState<'saving' | 'saved' | 'error' | null>(null);
   const [searchTarget, setSearchTarget] = useState<{ fileId: string; line: number } | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const findNode = (nodes: FileNode[], targetId: string): FileNode | null => {
     for (const node of nodes) {
@@ -274,7 +277,22 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
 
 
   const removeFileFromOpenFiles = (id: string) => {
-    setOpenFiles((prev) => prev.filter((node) => node.id !== id));
+    setOpenFiles((prev) => {
+      const fileIndex = prev.findIndex((file) => file.id === id);
+      const newOpenFiles = prev.filter((node) => node.id !== id);
+
+      if (activeFileId === id) {
+        if (newOpenFiles.length > 0) {
+          // If there are still open files, pick the one next to the closed one
+          const nextIndex = Math.min(fileIndex, newOpenFiles.length - 1);
+          setActiveFileId(newOpenFiles[nextIndex].id);
+        } else {
+          setActiveFileId(null);
+        }
+      }
+
+      return newOpenFiles;
+    });
   };
 
   const addFileToOpenFiles = (id: string) => {
@@ -306,7 +324,9 @@ export function FileTreeProvider({ children }: { children: ReactNode }) {
       removeFileFromOpenFiles,
       addFileToOpenFiles,
       searchTarget,
-      setSearchTarget
+      setSearchTarget,
+      isLoaded,
+      setIsLoaded
     }}>
       {children}
     </FileTreeContext.Provider>

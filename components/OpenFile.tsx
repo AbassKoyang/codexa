@@ -13,7 +13,7 @@ return (
     width={16}
     />
     <span className="truncate text-xs">{file.name}</span>
-    <button onClick={() => removeFileFromOpenFiles(file.id)} className={`${activeFileId === file.id ? 'opacity-100' : 'opacity-0'} items-center justify-center hover:bg-tokyo-hover hover:text-tokyo-blue transition-colors cursor-pointer p-0.5 rounded-md group-hover:opacity-100`}>
+    <button onClick={(e) => { e.stopPropagation(); removeFileFromOpenFiles(file.id); }} className={`${activeFileId === file.id ? 'opacity-100' : 'opacity-0'} items-center justify-center hover:bg-tokyo-hover hover:text-tokyo-blue transition-all duration-200 cursor-pointer p-0.5 rounded-md group-hover:opacity-100`}>
     <X strokeWidth={1} className={`size-3.5 ${activeFileId === file.id ? 'text-white' : 'text-tokyo-fg/80 hover:text-tokyo-fg'}`} />
     </button>
 </div>

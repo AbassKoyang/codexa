@@ -114,17 +114,17 @@ const Header = () => {
                   <Settings className="size-5" strokeWidth={1.5} />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-tokyo-bg border-tokyo-border text-tokyo-fg">
+              <DropdownMenuContent align="center" className="w-30 lg:w-48 bg-tokyo-bg border-gray-100/10 text-tokyo-fg z-[10000] border rounded-none">
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="hover:bg-tokyo-hover hover:text-tokyo-blue focus:bg-tokyo-hover focus:text-tokyo-blue cursor-pointer data-[state=open]:bg-tokyo-hover text-sm">
+                  <DropdownMenuSubTrigger className="rounded-none hover:bg-tokyo-hover hover:text-tokyo-blue focus:bg-tokyo-hover focus:text-tokyo-blue cursor-pointer data-[state=open]:bg-tokyo-hover text-sm">
                     Theme
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="bg-tokyo-bg border-tokyo-border text-tokyo-fg max-h-[300px] overflow-y-auto w-48 scrollbar-hide">
+                  <DropdownMenuSubContent className="bg-tokyo-bg border border-gray-100/10 rounded-none  text-tokyo-fg max-h-[300px] overflow-y-auto w-30 lg:w-48 scrollbar-hide">
                     {Object.entries(THEME_LIST).map(([id, name]) => (
                       <DropdownMenuItem 
                         key={id} 
                         onClick={() => setEditorTheme(id)}
-                        className={`hover:bg-tokyo-hover hover:text-tokyo-blue focus:bg-tokyo-hover focus:text-tokyo-blue cursor-pointer ${editorTheme === id ? 'text-tokyo-blue font-bold px-2' : ''}`}
+                        className={`rounded-none hover:bg-tokyo-hover hover:text-tokyo-blue focus:bg-tokyo-hover focus:text-tokyo-blue cursor-pointer ${editorTheme === id ? 'text-tokyo-blue font-bold px-2' : ''}`}
                       >
                          {name}
                       </DropdownMenuItem>

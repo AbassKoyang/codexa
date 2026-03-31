@@ -258,8 +258,8 @@ const RightPanel = () => {
   return (
     <div className={`
       ${isOpen ? 'w-full lg:w-[400px]' : 'w-0'} 
-      h-[calc(100%-36px)] lg:h-full lg:pt-10 bg-tokyo-bg flex flex-col border-l border-tokyo-border text-tokyo-fg 
-      transition-[width] duration-300 ease-in-out overflow-hidden select-none shrink-0 fixed lg:static bottom-0 right-0
+      h-[calc(100%-36px)] lg:h-full bg-tokyo-bg flex flex-col border-l border-tokyo-border text-tokyo-fg 
+      transition-[width] duration-300 ease-in-out overflow-hidden select-none shrink-0 fixed lg:static bottom-0 right-0 z-[5000] lg:z-[10]
     `}>
       <div className="flex flex-col h-full w-full min-w-[400px]">
         {/* Header */}
@@ -268,10 +268,7 @@ const RightPanel = () => {
             <Bot size={18} className="text-tokyo-blue" />
             <span className="text-xs font-bold tracking-wider text-white uppercase">AI ASSISTANT</span>
           </div>
-          <button className="hidden lg:block text-tokyo-muted hover:text-white transition-colors">
-            <MoreVertical size={16} />
-          </button>
-          <button onClick={() => setIsOpen(false)} className="lg:hidden text-tokyo-muted hover:text-white transition-colors">
+          <button onClick={() => setIsOpen(false)} className="text-tokyo-muted hover:text-white transition-colors">
             <X size={16} />
           </button>
         </div>

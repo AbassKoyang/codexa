@@ -21,12 +21,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const {
     data: user,
     isLoading,
-    isFetching,
     isError,
     error,
   } = useFetchSessionUser()
 
-  const loading = isLoading || isFetching
+  const loading = isLoading
 
   const setUser = (user: User | null) => {
     queryClient.setQueryData(['session-user'], user)
