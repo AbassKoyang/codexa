@@ -287,7 +287,7 @@ Continuation:
   // -----------------------------
   if (!activeFile || activeFile.type !== "file") {
     return (
-      <div className="w-full h-full pl-14 text-tokyo-fg bg-tokyo-bg flex flex-col">
+      <div className="w-full h-full pl-14 lg:pl-0 text-tokyo-fg bg-tokyo-bg flex flex-col">
         <OpenFiles />
 
         <div className="flex-1 flex items-center justify-center text-tokyo-fg/50 bg-tokyo-bg">
@@ -309,7 +309,7 @@ Continuation:
   // -----------------------------
   if (activeFile.pendingContent) {
     return (
-      <div className="w-full h-full pl-14 text-tokyo-fg bg-tokyo-bg flex flex-col overflow-hidden relative">
+      <div className="w-full h-full pl-14 lg:pl-0 text-tokyo-fg bg-tokyo-bg flex flex-col overflow-hidden relative">
         <OpenFiles />
 
         <div className="flex items-center justify-center px-6 py-2 bg1-tokyo-blue/5 border-b border-tokyo-border animate-in fade-in slide-in-from-top-2 duration-300 shrink-0 absolute bottom-0 left-1/2 -translate-x-1/2 z-10000">
@@ -358,7 +358,7 @@ Continuation:
   }
 
   return (
-    <div className="w-full h-full pl-14 text-tokyo-fg bg-tokyo-bg flex flex-col">
+    <div className="w-full h-full pl-14 lg:pl-0 text-tokyo-fg bg-tokyo-bg flex flex-col">
       <OpenFiles />
 
       <Editor

@@ -257,9 +257,9 @@ const RightPanel = () => {
 
   return (
     <div className={`
-      ${isOpen ? 'w-full' : 'w-0'} 
-      h-[calc(100%-36px)] bg-tokyo-bg flex flex-col border-l border-tokyo-border text-tokyo-fg 
-      transition-[width] duration-300 ease-in-out overflow-hidden select-none shrink-0 fixed bottom-0 right-0 z-2000
+      ${isOpen ? 'w-full lg:w-[400px]' : 'w-0'} 
+      h-[calc(100%-36px)] lg:h-full lg:pt-10 bg-tokyo-bg flex flex-col border-l border-tokyo-border text-tokyo-fg 
+      transition-[width] duration-300 ease-in-out overflow-hidden select-none shrink-0 fixed lg:static bottom-0 right-0
     `}>
       <div className="flex flex-col h-full w-full min-w-[400px]">
         {/* Header */}

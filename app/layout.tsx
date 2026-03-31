@@ -17,8 +17,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "codexa",
-  description: "Code anywhere.",
+  title: "Codexa - AI powered code editor",
+  description: "AI powered web based code editor for developers",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Codexa",
+  }
 };
 
 export default function RootLayout({
