@@ -1,12 +1,14 @@
 'use client';
 
-import React from 'react';
-import { Home, LayoutGrid, Settings, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { Home, LayoutGrid, Loader2, Settings, Sparkles } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
 import Link from 'next/link';
 import { url } from 'inspector';
 import { usePathname } from 'next/navigation';
+import { initializeSubscription } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface HomeSidebarProps {
   isOpen?: boolean;
@@ -16,12 +18,29 @@ interface HomeSidebarProps {
 const HomeSidebar = ({ isOpen, onClose }: HomeSidebarProps) => {
   const { user } = useAuth();
   const pathname = usePathname()
+  const [isUpgrading, setIsUpgrading] = useState(false);
   
   const navItems = [
     { id: 'home', icon: Home, label: 'Home', url: '/' },
     { id: 'templates', icon: LayoutGrid, label: 'Templates', url: '/templates' },
     { id: 'settings', icon: Settings, label: 'Settings', url: '/settings' },
   ];
+
+    const handleUpgrade = async () => {
+      setIsUpgrading(true);
+      try {
+        const data = await initializeSubscription();
+        if (data?.authorization_url) {
+          window.location.href = data.authorization_url;
+        } else {
+          toast.error("Failed to initialize payment.");
+        }
+      } catch (error) {
+        toast.error("An error occurred. Please try again.");
+      } finally {
+        setIsUpgrading(false);
+      }
+    };
 
   return (
     <>
@@ -80,16 +99,11 @@ const HomeSidebar = ({ isOpen, onClose }: HomeSidebarProps) => {
 
         {user?.plan === 'free' && (
           <button 
-            onClick={() => {
-               // Reusing the upgrade logic if possible or just navigating to a checkout if implemented
-               // For now, let's keep it consistent with the header's handleUpgrade but in sidebar
-               // Since we don't want to duplicate too much logic, maybe just a link or trigger
-            }}
+            onClick={handleUpgrade}
             className="w-full mt-4 flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-white bg-linear-to-r from-tokyo-blue to-purple-500 hover:opacity-90 transition-all sm:hidden"
           >
-            <Sparkles size={18} />
-            Upgrade to Pro
-          </button>
+            {isUpgrading ? <Loader2 className="size-4 animate-spin" /> : <Sparkles size={16} />}
+            {isUpgrading ? 'Redirecting...' : 'Upgrade to Pro'}          </button>
         )}
       </nav>
 

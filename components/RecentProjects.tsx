@@ -89,23 +89,23 @@ const RecentProjects = () => {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button onClick={(e) => e.stopPropagation()} className="p-1 text-tokyo-muted hover:text-white transition-colors shrink-0 z-10">
-                      <MoreHorizontal size={18} />
+                    <button onClick={(e) => e.stopPropagation()} className="p-2 text-tokyo-muted hover:text-white transition-colors">
+                      <MoreHorizontal size={20} />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent onClick={(e) => e.stopPropagation()} align="end" className="w-40 bg-tokyo-bg border-tokyo-border text-tokyo-fg z-50">
+                  <DropdownMenuContent onClick={(e) => e.stopPropagation()} align="end" className="w-50 bg-tokyo-bg border-tokyo-border text-tokyo-fg z-50 rounded-none flex items-center justify-center">
                     <DropdownMenuItem 
                       onClick={(e) => {
                         e.stopPropagation();
                         if(confirm("Are you sure you want to delete this project?")) {
                           deleteProjectMutation.mutate(project.slug, {
-                             onSuccess: () => toast.success("Project deleted")
+                              onSuccess: () => toast.success("Project deleted")
                           })
                         }
                       }}
-                      className="hover:bg-tokyo-hover focus:bg-tokyo-hover cursor-pointer text-sm text-red-400 focus:text-red-400"
+                      className="w-full hover:bg-tokyo-hover focus:bg-tokyo-hover cursor-pointer text-sm text-red-400 focus:text-red-400 rounded-none"
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
+                      <Trash2 className="w-4 h-4 mr-2 text-red-400 focus:text-red-400" />
                       Delete Project
                     </DropdownMenuItem>
                   </DropdownMenuContent>

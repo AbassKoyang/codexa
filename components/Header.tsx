@@ -51,8 +51,8 @@ const Header = () => {
   }
   
   return (
-    <div className="fixed top-0 left-0 w-full">
-      <div className="flex items-center justify-between h-[35px] bg-tokyo-bg text-tokyo-fg text-[13px] select-none font-sans px-2 border-b border-tokyo-border w-full z-[1000]">
+    <div className="fixed top-0 left-0 w-full z-[5000]">
+      <div className="flex items-center justify-between h-[35px] bg-tokyo-bg text-tokyo-fg text-[13px] select-none font-sans px-2 border-b border-tokyo-border w-full">
       <div className="flex items-center space-x-3">
         <Link href='/'>
           <div className="flex items-center justify-center p-0.5 border border-tokyo-blue border-dashed relative">
@@ -152,7 +152,7 @@ const Header = () => {
                   <ChevronDown className="size-4" strokeWidth={1.5} />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 bg-tokyo-bg border-tokyo-border text-tokyo-fg">
+              <DropdownMenuContent align="center" className="w-30 lg:w-40 bg-tokyo-bg border border-gray-100/10 text-tokyo-fg rounded-none">
                 <DropdownMenuItem 
                   onClick={handleSignout}
                   className="hover:bg-tokyo-hover hover:text-tokyo-blue focus:bg-tokyo-hover focus:text-tokyo-blue cursor-pointer text-sm text-red-400 hover:text-red-400 focus:text-red-400"

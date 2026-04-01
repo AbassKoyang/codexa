@@ -33,8 +33,20 @@ const Sidebar = () => {
   }
 
   return (
-    <div className="fixed lg:static flex h-[calc(100vh-35px)] select-none font-sans bg-tokyo-bg self-end z-1000">
-      <div className="w-[40px] lg:w-[48px] h-full bg-tokyo-panel flex flex-col items-center py-2 space-y-4 border-r border-tokyo-border z-10">
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-[900]" 
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+      
+      <div 
+        onClick={(e) => e.stopPropagation()} 
+        className="fixed lg:static flex h-[calc(100vh-35px)] select-none font-sans bg-tokyo-bg self-end z-[1000]"
+      >
+        <div className="w-[40px] lg:w-[48px] h-full bg-tokyo-panel flex flex-col items-center py-2 space-y-4 border-r border-tokyo-border z-10">
         {topIcons.map(({ id, Icon }) => {
           const isActive = activeTab === id;
           return (
@@ -70,6 +82,7 @@ const Sidebar = () => {
 
       {renderActiveTab()}
     </div>
+    </>
   );
 };
 

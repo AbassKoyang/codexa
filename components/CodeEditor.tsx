@@ -9,6 +9,9 @@ import { useProjectSave } from "@/lib/useProjectSave"
 import { useSettings } from "@/contexts/SettingsContext"
 import { getThemeData } from "@/lib/themes"
 import { api } from "@/lib/api"
+import { usePyodide } from "@/contexts/PyodideContext"
+import { useBottomPanelContext } from "@/contexts/LayoutContext"
+import { Play, Loader2 } from "lucide-react"
 
 const getLanguageFromExtension = (fileName: string) => {
   const extension = fileName.split(".").pop()?.toLowerCase()
@@ -39,10 +42,27 @@ export default function CodeEditor() {
   const { activeFile, updateNodeContent, acceptChanges, rejectChanges, searchTarget, setSearchTarget } = useFileTree()
   const [code, setCode] = useState("")
   const [suggestion, setSuggestion] = useState("")
+  const [fontSize, setFontSize] = useState(14)
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setFontSize(12);
+      } else {
+        setFontSize(14);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const saveTree = useProjectSave()
   const { editorTheme } = useSettings()
   const monaco = useMonaco()
+  
+  const { runCode, isRunning, isReady } = usePyodide()
+  const { setIsOpen: setBottomOpen } = useBottomPanelContext()
 
   const editorRef = useRef<any>(null)
   const providerRef = useRef<any>(null)
@@ -268,6 +288,13 @@ Continuation:
     }, 200);
   };
 
+  const handleRun = async () => {
+    if (activeFile && activeFile.type === 'file' && activeFile.name.endsWith('.py')) {
+      setBottomOpen(true);
+      await runCode(code, activeFile.name);
+    }
+  };
+
   // -----------------------------
   // Search navigation jump
   // -----------------------------
@@ -334,7 +361,7 @@ Continuation:
 
         <div className="flex-1">
           <DiffEditor
-            height="100%"
+            height="calc(100% - 35px)"
             onMount={handleDiffEditorDidMount}
             language={getLanguageFromExtension(activeFile.name)}
             theme={editorTheme}
@@ -342,7 +369,7 @@ Continuation:
             modified={activeFile.pendingContent}
             options={{
               minimap: { enabled: false },
-              fontSize: 14,
+              fontSize: fontSize,
               fontFamily: "'Geist Mono', monospace",
               wordWrap: "on",
               scrollBeyondLastLine: false,
@@ -356,13 +383,27 @@ Continuation:
       </div>
     );
   }
-
   return (
     <div className="w-full h-full pl-14 lg:pl-0 text-tokyo-fg bg-tokyo-bg flex flex-col">
-      <OpenFiles />
+      <div className="flex items-center justify-between bg-tokyo-bg border-b border-tokyo-border pr-4">
+        <OpenFiles />
+        
+        {activeFile.name.endsWith('.py') && (
+           <button 
+             onClick={handleRun}
+             className={`flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold rounded-none transition-all ${
+               isRunning ? 'bg-tokyo-blue/20 text-tokyo-blue cursor-not-allowed' : 
+               'bg-tokyo-blue text-white hover:bg-tokyo-blue/80 shadow-sm'
+             }`}
+           >
+             {isRunning ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} fill="currentColor" />}
+             {isRunning ? 'RUNNING...' : 'RUN'}
+           </button>
+        )}
+      </div>
 
       <Editor
-        height="calc(100vh - 40px)"
+        height="calc(100% - 35px)"
         onMount={handleEditorDidMount}
         language={getLanguageFromExtension(activeFile.name)}
         theme={editorTheme}
@@ -370,7 +411,7 @@ Continuation:
         onChange={handleEditorChange}
         options={{
           minimap: { enabled: false },
-          fontSize: 14,
+          fontSize: fontSize,
           fontFamily: "'Geist Mono', monospace",
           wordWrap: "on",
           inlineSuggest: { enabled: true }
