@@ -90,8 +90,31 @@ const ShareTest = () => {
 
         toast.info(`Preparing to share ${selected.length} products...`);
 
-        for (const p of selected) {
-            await handleShareItem(p);
+        try {
+            const files = await Promise.all(
+                selected.map((p, i) => fetchImageAsFile(p.image, `product-${i}.png`))
+            );
+            
+            const validFiles = files.filter((f): f is File => f !== null);
+
+            if (navigator.share && validFiles.length > 0) {
+                const shareData: ShareData = {
+                    files: validFiles,
+                };
+
+                if (navigator.canShare && navigator.canShare(shareData)) {
+                    await navigator.share(shareData);
+                    toast.success('Shared successfully!');
+                } else {
+                    toast.error('The browser does not support sharing multiple files.');
+                }
+            } else if (validFiles.length === 0) {
+                toast.error('Could not load product images to share.');
+            }
+        } catch (err) {
+            if ((err as Error).name !== 'AbortError') {
+                toast.error('Error sharing products');
+            }
         }
 
         setSelectedIndices(new Set());
