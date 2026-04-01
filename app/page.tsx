@@ -5,6 +5,7 @@ import HomeSidebar from "@/components/HomeSidebar";
 import HomeHeader from "@/components/HomeHeader";
 import RecentProjects from "@/components/RecentProjects";
 import AllProjects from "@/components/AllProjects";
+import ShareTest from '@/components/ShareTest';
 
 export default function Home() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,6 +22,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12 pb-12">
               <RecentProjects />
               <AllProjects />
+              <ShareTest />
             </div>
           </main>
         </div>
