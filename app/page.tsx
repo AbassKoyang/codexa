@@ -22,7 +22,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12 pb-12">
               <RecentProjects />
               <AllProjects />
-              <ShareTest />
+              {/* <ShareTest /> */}
             </div>
           </main>
         </div>
